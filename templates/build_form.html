@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if build else 'New' }} Build - PC Build Manager{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">{{ 'Edit Build' if build else 'Create New Build' }}</h2>
+<form method="post" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label for="name" class="form-label">Build Name</label>
+    <input type="text" class="form-control" id="name" name="name" placeholder="Enter build name" value="{{ build.name if build else '' }}" required>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="tier" class="form-label">Marketing Tier</label>
+      <select id="tier" name="tier" class="form-select">
+        <option value="">-- Select Tier --</option>
+        {% for tier in tiers %}
+          <option value="{{ tier.id }}" {% if build and build.tier and build.tier.id == tier.id %}selected{% endif %}>{{ tier.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label for="family" class="form-label">Processor Family</label>
+      <select id="family" name="family" class="form-select">
+        <option value="">-- Select Family --</option>
+        {% for fam in families %}
+          <option value="{{ fam.id }}" {% if build and build.family and build.family.id == fam.id %}selected{% endif %}>{{ fam.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="image" class="form-label">Build Image</label>
+    <input class="form-control" type="file" id="image" name="image" accept="image/*">
+    {% if build and build.image_path %}
+      <small class="text-muted">Current image: <a href="{{ url_for('static', filename=build.image_path) }}" target="_blank">View</a></small>
+    {% endif %}
+  </div>
+
+  <hr class="my-4">
+  <h4>Components</h4>
+  {% for cat in part_categories %}
+    <div class="row align-items-end mb-3">
+      <div class="col-md-5">
+        <label for="part_{{ cat.id }}" class="form-label">Select {{ cat.name }}</label>
+        <select id="part_{{ cat.id }}" name="part_{{ cat.id }}" class="form-select">
+          <option value="">-- None --</option>
+          {% for part in cat.parts %}
+            <option value="{{ part.id }}" {% for bp in (build.parts if build else []) %}{% if bp.part.id == part.id %}selected{% endif %}{% endfor %}>
+              {{ part.name }}{% if part.price %} (${{ '%.2f'|format(part.price) }}){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="price_{{ cat.id }}" class="form-label">Override Price</label>
+        <input type="number" step="0.01" min="0" class="form-control" id="price_{{ cat.id }}" name="price_{{ cat.id }}" value="{% for bp in (build.parts if build else []) %}{% if bp.part.category.id == cat.id and bp.price_override is not none %}{{ bp.price_override }}{% endif %}{% endfor %}" placeholder="Leave blank to use base price">
+      </div>
+    </div>
+  {% endfor %}
+
+  <hr class="my-4">
+  <div class="d-flex gap-2">
+    <button type="submit" name="action" value="draft" class="btn btn-secondary">Save as Draft</button>
+    <button type="submit" name="action" value="approve" class="btn btn-info">Approve</button>
+    <button type="submit" name="action" value="publish" class="btn btn-success">Publish</button>
+  </div>
+</form>
+{% endblock %}

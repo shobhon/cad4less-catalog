@@ -1,0 +1,40 @@
+{# Base template for the Flask application.
+   Provides common HTML structure and includes Bootstrap via CDN. Other
+   templates should extend this base and override the `content` block. #}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PC Build Manager{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gOtvjX0O8CweBcpQ3SlBZv1nCnY3unHjDI8UfY31zM2tXWdtiDfe0EknkjN4y1ii" crossorigin="anonymous">
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('builds_list') }}">PC Build Manager</a>
+        {% if current_user.is_authenticated %}
+        <div class="d-flex">
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
+        </div>
+        {% endif %}
+      </div>
+    </nav>
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+    <!-- Bootstrap JS (popper & bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-je/d/pqU5ZSxEi/iC197oJ/GVU25io3I9x/h1X5dQIbz7a7o9/7Lkf5X7vhv9XeV" crossorigin="anonymous"></script>
+  </body>
+</html>

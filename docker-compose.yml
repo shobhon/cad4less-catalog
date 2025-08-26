@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./static/uploads:/app/static/uploads
+    # Uncomment the following if you want live reload in development
+    # environment:
+    #   - FLASK_ENV=development

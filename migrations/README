@@ -1,0 +1,20 @@
+This directory will contain Alembic migration scripts. To initialize
+database migrations, run:
+
+```
+flask db init
+```
+
+Then, after defining or updating your models, create a migration with:
+
+```
+flask db migrate -m "Initial migration"
+```
+
+Finally, apply migrations using:
+
+```
+flask db upgrade
+```
+
+The generated `versions/` subdirectory will contain migration scripts.
