@@ -91,35 +91,25 @@ class User(UserMixin, db.Model):
 
 
 class Category(db.Model):
-    """General purpose category model.
-
-    Categories can be one of three types:
-
-    - Part: describes a PC component category like CPU, GPU, RAM, etc.
-    - Tier: describes the marketing tier (e.g. Economy, Standard, Premium).
-    - Family: describes the processor family (e.g. Intel Core i7, AMD Ryzen 9).
-    """
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     type = db.Column(db.String(20), nullable=False)  # Part, Tier or Family
 
-    # Establish a relationship to Part for categories of type 'Part'. This
-    # attribute is only populated for categories representing component
-    # categories (e.g. CPU, GPU, RAM). For other category types it will
-    # simply be an empty collection. Using `lazy='dynamic'` enables
-    # efficient querying.
-    parts = db.relationship('Part', backref='category', lazy='dynamic')
+    # change this relationship to remove backref and use back_populates
+    # parts = db.relationship('Part', backref='category', lazy='dynamic')
+    parts = db.relationship('Part', back_populates='category', lazy='dynamic')
 
 
 class Part(db.Model):
-    """Model representing an individual PC part/component."""
     __tablename__ = 'parts'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
-    category = db.relationship('Category')
-    price = db.Column(db.Float, nullable=True)  # base price for this part
+    # change this line:
+    # category = db.relationship('Category')
+    category = db.relationship('Category', back_populates='parts')
+    price = db.Column(db.Float, nullable=True)
 
 
 class Build(db.Model):
@@ -143,7 +133,7 @@ class Build(db.Model):
     parts = db.relationship(
         'BuildPart',
         back_populates='build',
-        cascade='all, delete‑orphan',
+        cascade='all, delete-orphan',
     )
 
 

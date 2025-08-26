@@ -1,29 +1,21 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Use a fuller base to avoid apt issues on arm64
+FROM python:3.11
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
-
-# Set the working directory
 WORKDIR /app
 
-# Install system dependencies required for Pillow
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libjpeg-dev \
-    zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Make pip quiet and lightweight during build
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_PROGRESS_BAR=off
 
-# Copy application requirements and install them
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+# Copy deps and install
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip && \
+    pip install --progress-bar off -r requirements.txt
 
-# Copy the application code
+# Copy the app
 COPY . .
 
-# Expose port 5000 for the Flask app
 EXPOSE 5000
-
-# Default command to run the Flask application using Gunicorn
 CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
