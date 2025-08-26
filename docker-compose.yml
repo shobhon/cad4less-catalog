@@ -1,14 +1,10 @@
-version: '3.8'
-
+version: "3.9"
 services:
   web:
     build: .
+    command: gunicorn -w 2 --threads 1 -b 0.0.0.0:5000 --access-logfile - --error-logfile - wsgi:app
     ports:
-      - "5001:5000"
-    env_file:
-      - .env
+      - "5001:5000"         # host:container
     volumes:
-      - ./static/uploads:/app/static/uploads
-    # Uncomment the following if you want live reload in development
-    # environment:
-    #   - FLASK_ENV=development
+      - .:/app
+      - ./instance:/app/instance

@@ -4,3 +4,7 @@ flask-login==0.6.3
 flask-migrate==4.0.4
 pillow==10.3.0
 gunicorn==21.2.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+wtforms
+flask-wtf

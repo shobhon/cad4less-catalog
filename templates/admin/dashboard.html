@@ -1,0 +1,46 @@
+{# templates/admin/dashboard.html #}
+{% extends "base.html" %}
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<h2>Import Product Catalog</h2>
+<form method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.csv_file.label }}<br>
+        {{ form.csv_file(class="form-control-file") }}
+    </p>
+    <p>{{ form.submit(class="btn btn-primary") }}</p>
+</form>
+
+{% if imported_products %}
+  <h3>Preview Imported Products</h3>
+  <table class="table">
+    <thead>
+      <tr><th>Handle</th><th>Title</th><th>Vendor</th><th>Price</th></tr>
+    </thead>
+    <tbody>
+      {% for prod in imported_products %}
+      <tr>
+        <td>{{ prod.handle }}</td>
+        <td>{{ prod.title }}</td>
+        <td>{{ prod.vendor }}</td>
+        <td>${{ "%.2f"|format(prod.price) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{# Existing dashboard content goes here, including PC Builds display #}
+{% endblock %}

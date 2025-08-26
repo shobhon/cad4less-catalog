@@ -24,7 +24,7 @@ deployment with Docker and continuous delivery to AWS Elastic Beanstalk.
 
    ```sh
    git clone <your-repo-url>
-   cd flask-pc-builds
+   cd cad4less-catalog
    ```
 
 2. **Create a `.env` file** by copying `.env.example` and updating values:

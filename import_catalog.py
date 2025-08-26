@@ -27,7 +27,8 @@ from bs4 import BeautifulSoup
 from PIL import Image
 import requests
 
-from app import app, db, Category, Part, Build, BuildPart
+from models import Category, Part, Build, BuildPart  # move models to models.py
+from extensions import db  # move db to extensions.py
 
 # Category mapping similar to JSON import
 CATEGORY_MAPPING = {
