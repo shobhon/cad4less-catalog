@@ -32,7 +32,11 @@
       <td>
         <!-- Separate form for price update to avoid nesting -->
         <form method="post" action="{{ url_for('update_build_price', build_id=b.id) }}" style="display:flex; gap:6px; align-items:center; margin:0;">
-          <input name="price" value="{{ '%.2f'|format(b.price) if b.price is not none else '' }}" placeholder="e.g. 1299.00" style="width:120px">
+          <input
+            name="price"
+            placeholder="e.g. 1299.00"
+            style="width:120px"
+            value="{% if b.price is defined and b.price is not none %}{{ '%.2f'|format(b.price) }}{% endif %}">
           <button class="btn secondary" type="submit">Update</button>
         </form>
       </td>

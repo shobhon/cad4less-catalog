@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Edit Part</h2>
+
+<form method="post" action="{{ url_for('update_part_submit', part_id=part.id) }}" style="max-width:900px; display:grid; gap:14px;">
+  <label style="display:grid; gap:6px;">
+    <div>Part Name *</div>
+    <input
+      class="autosize"
+      data-minch="24"
+      data-maxch="70"
+      name="name"
+      required
+      value="{{ part.name }}">
+  </label>
+
+  <label style="display:grid; gap:6px;">
+    <div>Brand</div>
+    <input
+      class="autosize"
+      data-minch="18"
+      data-maxch="40"
+      name="brand"
+      value="{{ part.brand }}">
+  </label>
+
+  <label style="display:grid; gap:6px;">
+    <div>Price</div>
+    <input
+      class="autosize"
+      data-minch="8"
+      data-maxch="14"
+      inputmode="decimal"
+      name="price"
+      value="{% if part.price is not none %}{{ '%.2f'|format(part.price) }}{% endif %}">
+  </label>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="btn primary" type="submit">Save Changes</button>
+    <a class="btn" href="{{ url_for('list_parts') }}">Back to Parts</a>
+  </div>
+</form>
+
+<script>
+(function(){
+  // Auto-size text inputs to their content using ch units
+  function fit(el){
+    const min = +(el.dataset.minch || 10);
+    const max = +(el.dataset.maxch || 50);
+    const val = el.value || el.placeholder || "";
+    const ch = Math.min(Math.max(val.length + 2, min), max); // padding for caret
+    el.style.width = ch + "ch";
+  }
+  const inputs = document.querySelectorAll('input.autosize');
+  inputs.forEach(el => {
+    // initial fit
+    fit(el);
+    // refit on input
+    el.addEventListener('input', () => fit(el));
+  });
+})();
+</script>
+{% endblock %}

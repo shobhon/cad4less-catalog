@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Add New Part</h2>
+
+<form method="post" action="{{ url_for('create_part') }}" style="max-width:900px; display:grid; gap:14px;">
+  <label style="display:grid; gap:6px;">
+    <div>Part Name *</div>
+    <input
+      class="autosize"
+      data-minch="24"
+      data-maxch="70"
+      name="name"
+      required
+      placeholder="e.g., Intel Core i7-13700K">
+  </label>
+
+  <label style="display:grid; gap:6px;">
+    <div>Brand</div>
+    <input
+      class="autosize"
+      data-minch="18"
+      data-maxch="40"
+      name="brand"
+      placeholder="e.g., Intel">
+  </label>
+
+  <label style="display:grid; gap:6px;">
+    <div>Price</div>
+    <input
+      class="autosize"
+      data-minch="8"
+      data-maxch="14"
+      inputmode="decimal"
+      name="price"
+      placeholder="e.g., 329.99">
+  </label>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="btn primary" type="submit">Create Part</button>
+    <a class="btn" href="{{ url_for('list_parts') }}">Cancel</a>
+  </div>
+</form>
+
+<script>
+(function(){
+  // Auto-size text inputs to their content using ch units
+  function fit(el){
+    const min = +(el.dataset.minch || 10);
+    const max = +(el.dataset.maxch || 50);
+    const val = el.value || el.placeholder || "";
+    const ch = Math.min(Math.max(val.length + 2, min), max);
+    el.style.width = ch + "ch";
+  }
+  const inputs = document.querySelectorAll('input.autosize');
+  inputs.forEach(el => {
+    fit(el);
+    el.addEventListener('input', () => fit(el));
+  });
+})();
+</script>
+{% endblock %}

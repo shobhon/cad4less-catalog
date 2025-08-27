@@ -255,6 +255,100 @@ def create_app():
         db.session.commit()
         flash("Build created.", "success")
         return redirect(url_for("list_builds"))
+    
+    # --- Add New Part (form) ---
+    @app.get("/parts/new")
+    def new_part_form():
+        return render_template("part_new.html")
+
+    # --- Create New Part (submit) ---
+    @app.post("/parts/new")
+    def create_part():
+        name = (request.form.get("name") or "").strip()
+        brand = (request.form.get("brand") or "").strip() or None
+        price = _parse_price(request.form.get("price", ""))
+
+        if not name:
+            flash("Part name is required.", "error")
+            return redirect(url_for("new_part_form"))
+
+        # Optional: ensure columns exist (dev-friendly)
+        _ensure_part_brand_column()
+
+        # Create
+        part = Part(name=name)
+        if hasattr(Part, "brand"):
+            part.brand = brand
+        if hasattr(Part, "price"):
+            part.price = price
+        db.session.add(part)
+        db.session.commit()
+
+        flash("Part added.", "success")
+        return redirect(url_for("list_parts"))
+
+    # --- Edit Part (form) ---
+    @app.get("/parts/<int:part_id>")
+    def edit_part_form(part_id: int):
+        part = Part.query.get_or_404(part_id)
+        # Make a safe dict so template won't break if some attrs are missing
+        data = {
+            "id": part.id,
+            "name": part.name,
+            "brand": getattr(part, "brand", "") or "",
+            "price": getattr(part, "price", None),
+        }
+        return render_template("part_edit.html", part=data)
+
+    # --- Update Part (submit) ---
+    @app.post("/parts/<int:part_id>")
+    def update_part_submit(part_id: int):
+        part = Part.query.get_or_404(part_id)
+        name = (request.form.get("name") or "").strip()
+        brand = (request.form.get("brand") or "").strip() or None
+        price = _parse_price(request.form.get("price", ""))
+
+        if not name:
+            flash("Part name is required.", "error")
+            return redirect(url_for("edit_part_form", part_id=part.id))
+
+        # Ensure columns exist if running in dev without migrations
+        _ensure_part_brand_column()
+
+        # Update via ORM when columns exist; fallback to SQL if model lacks fields
+        changed = False
+
+        if part.name != name:
+            part.name = name
+            changed = True
+
+        if hasattr(Part, "brand"):
+            if (brand or None) != getattr(part, "brand", None):
+                part.brand = brand
+                changed = True
+        else:
+            table = getattr(Part, "__tablename__", Part.__table__.name)
+            db.session.execute(text(f'UPDATE "{table}" SET brand=:brand WHERE id=:id'),
+                            {"brand": brand, "id": part.id})
+            changed = True
+
+        if hasattr(Part, "price"):
+            if getattr(part, "price", None) != price:
+                part.price = price
+                changed = True
+        else:
+            table = getattr(Part, "__tablename__", Part.__table__.name)
+            db.session.execute(text(f'UPDATE "{table}" SET price=:price WHERE id=:id'),
+                            {"price": price, "id": part.id})
+            changed = True
+
+        if changed:
+            db.session.commit()
+            flash("Part updated.", "success")
+        else:
+            flash("No changes detected.", "success")
+
+        return redirect(url_for("list_parts"))
 
     # ---------- IMPORT ----------
     @app.route("/import", methods=["GET", "POST"])
@@ -313,18 +407,24 @@ def _ensure_build_price_column():
         # If anything fails (e.g., permissions), we just proceed without hard failing.
         db.session.rollback()
 
-def _ensure_part_brand_column():
-    """Ensure Part.brand column exists (dev-friendly auto-migration)."""
-    try:
-        inspector = inspect(db.engine)
-        # get real table name from model
-        table_name = getattr(Part, "__tablename__", Part.__table__.name)
-        cols = [c["name"].lower() for c in inspector.get_columns(table_name)]
-        if "brand" not in cols:
-            db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN brand TEXT'))
-            db.session.commit()
-    except Exception:
-        db.session.rollback()
+    def _ensure_part_brand_column():
+        """Ensure Part.brand exists (and price already exists in your model)."""
+        try:
+            inspector = inspect(db.engine)
+            table_name = getattr(Part, "__tablename__", Part.__table__.name)
+            cols = [c["name"].lower() for c in inspector.get_columns(table_name)]
+            changed = False
+            if "brand" not in cols:
+                db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN brand TEXT'))
+                changed = True
+            # If your Part model might lack price in DB, uncomment the next 3 lines:
+            # if "price" not in cols:
+            #     db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN price FLOAT'))
+            #     changed = True
+            if changed:
+                db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 def _pick(row: dict, *candidates, default=None):
     lowered = {k.lower(): v for k, v in row.items()}

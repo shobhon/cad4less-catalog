@@ -2,9 +2,9 @@
 {% block content %}
 <h2>Parts</h2>
 
-<!-- Bulk delete trigger button -->
 <p>
   <a class="btn" href="{{ url_for('import_catalog') }}">Import CSV</a>
+  <a class="btn primary" href="{{ url_for('new_part_form') }}">Add New Part</a>
   <button class="btn secondary" type="button" onclick="submitBulkDelete()">Delete Selected</button>
 </p>
 
@@ -20,62 +20,40 @@
       </th>
       <th>Name</th>
       <th>Category</th>
-      <th style="min-width:220px;">Brand (editable)</th>
+      <th>Brand</th>
       <th>URL</th>
-      <th style="min-width:160px;">Price (editable)</th>
-      <th style="width:120px;">Save</th>
+      <th>Price</th>
     </tr>
   </thead>
   <tbody>
   {% for p in parts %}
     <tr>
       <td><input class="row-select" type="checkbox" value="{{ p.id }}"></td>
-      <td>{{ p.name }}</td>
+      <td><a href="{{ url_for('edit_part_form', part_id=p.id) }}">{{ p.name }}</a></td>
       <td>{{ p.category }}</td>
-
-      <!-- Per-row edit form: Brand + Price -->
-      <td>
-        <form method="post" action="{{ url_for('update_part_fields', part_id=p.id) }}" id="form-{{ p.id }}" style="display:flex; gap:6px; align-items:center; margin:0;">
-          <input name="brand" value="{{ p.brand or '' }}" placeholder="Brand" style="width:200px">
-      </td>
-
+      <td>{{ p.brand or "" }}</td>
       <td>{% if p.url %}<a href="{{ p.url }}" target="_blank" rel="noopener">Link</a>{% endif %}</td>
-
-      <td>
-          <input name="price" value="{% if p.price is not none %}{{ '%.2f'|format(p.price) }}{% endif %}" placeholder="e.g. 199.99" style="width:120px">
-      </td>
-      <td>
-          <button class="btn secondary" type="submit">Update</button>
-        </form>
-      </td>
+      <td>{% if p.price is not none %}${{ "%.2f"|format(p.price) }}{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
 {% else %}
-<p><em>No parts found. Try importing a CSV.</em></p>
+<p><em>No parts found. Try importing a CSV or add a new part.</em></p>
 {% endif %}
 
 <script>
 function submitBulkDelete(){
   const form = document.getElementById('bulkDeleteForm');
-  // clear existing hidden inputs
   [...form.querySelectorAll('input[name="selected_ids"]')].forEach(e => e.remove());
   const checked = [...document.querySelectorAll('.row-select:checked')];
-  if(checked.length === 0){
-    alert('Select at least one part to delete.');
-    return;
-  }
+  if(checked.length === 0){ alert('Select at least one part to delete.'); return; }
   checked.forEach(cb => {
     const i = document.createElement('input');
-    i.type = 'hidden';
-    i.name = 'selected_ids';
-    i.value = cb.value;
+    i.type = 'hidden'; i.name = 'selected_ids'; i.value = cb.value;
     form.appendChild(i);
   });
-  if(confirm('Delete selected parts? This cannot be undone.')){
-    form.submit();
-  }
+  if(confirm('Delete selected parts? This cannot be undone.')){ form.submit(); }
 }
 </script>
 {% endblock %}
