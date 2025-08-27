@@ -1,45 +1,38 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Products</h2>
+<h2>Products (PCs)</h2>
 
-{% if parts %}
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Category</th>
-      <th>Brand</th>
-      <th>URL</th>
-      <th>Price</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for p in parts %}
-    <tr>
-      <td>{{ p.name }}</td>
-      <td>{{ p.category }}</td>
-      <td>{{ p.brand or "" }}</td>
-      <td>
-        {% if p.url %}
-          <a href="{{ p.url }}" target="_blank" rel="noopener">Link</a>
-        {% endif %}
-      </td>
-      <td>
-        {% if p.price is not none %} ${{ "%.2f"|format(p.price) }} {% endif %}
-      </td>
-      <td>
-        <form method="post" action="{{ url_for('delete_product', part_id=p.id) }}" onsubmit="return confirm('Delete this product?');">
-          <button class="btn secondary" type="submit">Delete</button>
-        </form>
-      </td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>No products found. Try <a class="btn" href="{{ url_for('import_catalog') }}">Import CSV</a>.</p>
-{% endif %}
+<form method="post" action="{{ url_for('delete_builds') }}" onsubmit="return confirm('Delete selected PCs? This cannot be undone.');">
+  <p>
+    <a class="btn" href="{{ url_for('import_catalog') }}">Import CSV</a>
+    <a class="btn" href="{{ url_for('list_parts') }}">View Parts</a>
+    <a class="btn" href="{{ url_for('new_build_form') }}">New Build</a>
+    <button class="btn secondary" type="submit">Delete Selected</button>
+  </p>
 
-<p><a class="btn" href="{{ url_for('import_catalog') }}">Import CSV</a></p>
+  {% if builds %}
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" onclick="for(const cb of document.querySelectorAll('.row-select')) cb.checked=this.checked;"></th>
+        <th>ID</th><th>Name</th><th># Parts</th><th>Total Price</th><th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for b in builds %}
+      <tr>
+        <td><input class="row-select" type="checkbox" name="selected_ids" value="{{ b.id }}"></td>
+        <td>{{ b.id }}</td>
+        <td>{{ b.name }}</td>
+        <td>{{ b.part_count }}</td>
+        <td>${{ "%.2f"|format(b.total_price) }}</td>
+        <td>{{ b.created_at }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p><em>No PCs found. Try importing the Shopify CSV.</em></p>
+  {% endif %}
+</form>
 {% endblock %}

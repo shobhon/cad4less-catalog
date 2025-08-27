@@ -1,29 +1,36 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CAD4Less Catalog</title>
-<style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:24px}
-nav a{margin-right:12px}
-.flash{padding:8px 12px;border-radius:6px;margin:12px 0}
-.flash.error{background:#ffe5e5;color:#900}
-.flash.success{background:#e6ffed;color:#065f46}
-.btn{display:inline-block;padding:8px 12px;border:1px solid #333;border-radius:6px;text-decoration:none;color:#111}
-.btn.primary{background:#111;color:#fff}
-.btn.secondary{background:#f6f6f6}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #ddd;padding:8px}
-th{background:#f6f6f6}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CAD4Less Catalog Builder</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:24px}
+    header{margin-bottom:20px}
+    header h1{margin:0;font-size:1.6rem}
+    nav a{margin-right:12px}
+    .flash{padding:8px 12px;border-radius:6px;margin:12px 0}
+    .flash.error{background:#ffe5e5;color:#900}
+    .flash.success{background:#e6ffed;color:#065f46}
+    .btn{display:inline-block;padding:8px 12px;border:1px solid #333;border-radius:6px;text-decoration:none;color:#111}
+    .btn.primary{background:#111;color:#fff}
+    .btn.secondary{background:#f6f6f6}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #ddd;padding:8px}
+    th{background:#f6f6f6}
+  </style>
 </head>
 <body>
-<nav>
-  <a href="{{ url_for('list_builds') }}">Builds</a>
-  <a href="{{ url_for('new_build_form') }}">New Build</a>
-  <a href="{{ url_for('import_catalog') }}">Import CSV</a>
-  <a href="{{ url_for('list_products') }}">Products</a>
-</nav>
+
+<header>
+  <h1>CAD4Less Catalog Builder</h1>
+  <nav>
+    <a href="{{ url_for('list_builds') }}">Builds</a>
+    <a href="{{ url_for('new_build') }}">New Build</a>
+    <a href="{{ url_for('import_catalog_route') }}">Import CSV</a>
+    <a href="{{ url_for('list_parts') }}">Parts</a>
+  </nav>
+</header>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -34,5 +41,6 @@ th{background:#f6f6f6}
 {% endwith %}
 
 {% block content %}{% endblock %}
+
 </body>
 </html>

@@ -44,6 +44,7 @@ class Build(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     name       = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    price = db.Column(db.Float, nullable=True)
 
     build_parts = db.relationship("BuildPart", back_populates="build", cascade="all, delete-orphan")
     parts       = db.relationship("Part", secondary="build_part", viewonly=True, back_populates="builds")

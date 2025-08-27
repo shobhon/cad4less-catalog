@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Build Specification</h2>
+<p><strong>Name:</strong> {{ build.name }}<br>
+<strong>Created:</strong> {{ build.created_at }}</p>
+
+{% if groups %}
+  {% for cat, items in groups %}
+    <h3>{{ cat }}</h3>
+    <table>
+      <thead><tr><th>Part</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        {% for it in items %}
+          <tr>
+            <td>{{ it.name }}</td>
+            <td>{{ it.qty }}</td>
+            <td>{% if it.price is not none %}${{ "%.2f"|format(it.price) }}{% else %}-{% endif %}</td>
+            <td>${{ "%.2f"|format(it.subtotal) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
+
+  <h3>Total</h3>
+  <p><strong>${{ "%.2f"|format(total) }}</strong></p>
+{% else %}
+  <p><em>No parts linked to this build.</em></p>
+{% endif %}
+
+<p>
+  <a class="btn" href="{{ url_for('list_builds') }}">Back to Builds</a>
+  <a class="btn" href="{{ url_for('list_products') }}">Back to Products (PCs)</a>
+</p>
+{% endblock %}
