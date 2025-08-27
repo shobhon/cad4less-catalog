@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>New Build</h1>
+<form method="post" action="{{ url_for('create_build') }}">
+  <label>Build name<br><input type="text" name="name" required></label>
+  <p style="margin-top:16px;">
+    <button class="btn primary" type="submit">Create</button>
+    <a class="btn" href="{{ url_for('list_builds') }}">Cancel</a>
+  </p>
+</form>
+{% endblock %}

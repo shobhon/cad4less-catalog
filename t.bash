@@ -1,13 +1,5 @@
-# show models.py that Python is importing inside the container
-docker compose run --rm web python - <<'PY'
-import inspect, models
-print(inspect.getsource(models))
-PY
-
-# show the first lines of app.py as seen by the container
-docker compose run --rm web python - <<'PY'
-import inspect, app
-import textwrap
-src = inspect.getsource(app)
-print("\n".join(src.splitlines()[:30]))
-PY
+# from project root
+mkdir -p instance
+chmod 777 instance   # be permissive to avoid uid/gid surprises
+docker compose up -d web
+docker compose exec web bash -lc 'ls -ld /app/instance && touch /app/instance/.perm_check && ls -l /app/instance/.perm_check'

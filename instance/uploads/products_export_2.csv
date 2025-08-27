@@ -1,0 +1,1969 @@
+Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published,Option1 Name,Option1 Value,Option1 Linked To,Option2 Name,Option2 Value,Option2 Linked To,Option3 Name,Option3 Value,Option3 Linked To,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Variant Barcode,Image Src,Image Position,Image Alt Text,Gift Card,SEO Title,SEO Description,Google Shopping / Google Product Category,Google Shopping / Gender,Google Shopping / Age Group,Google Shopping / MPN,Google Shopping / Condition,Google Shopping / Custom Product,Google Shopping / Custom Label 0,Google Shopping / Custom Label 1,Google Shopping / Custom Label 2,Google Shopping / Custom Label 3,Google Shopping / Custom Label 4,EComposer product countdown end at (product.metafields.ecomposer.countdown),EComposer product countdown start at (product.metafields.ecomposer.countdown_from),Google: Custom Product (product.metafields.mm-google-shopping.custom_product),Variant Image,Variant Weight Unit,Variant Tax Code,Cost per item,Status
+22-fhd-lcd-1920x1080,22” FHD LCD 1920X1080 VGA/HDMI,"",CAD4LESS,Electronics > Computers > Desktop Computers,Accessories,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,89.00,,true,true,"",,,,false,,,,,,,,,,,,,,,,,,lb,,,active
+24-fhd-lcd-1920x1080-vga-hdmi,24” FHD LCD 1920x1080 VGA/HDMI,"",CAD4LESS,Electronics > Computers > Desktop Computers,Accessories,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,115.00,,true,true,"",,,,false,,,,,,,,,,,,,,,,,,lb,,,active
+27-fhd-lcd-1920x1080-vga-hdmi,27” FHD LCD 1920x1080 VGA/HDMI,"",CAD4LESS,Electronics > Computers > Desktop Computers,Accessories,"",false,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,139.00,,true,true,,,,,false,,,,,,,,,,,,,,,,,,lb,,,draft
+6ft-dp-dp-hi-end-video-cable,6ft DP-DP Hi-End Video Cable,"",CAD4LESS,Electronics > Computers > Desktop Computers,Accessories,"",true,Title,Default Title,,,,,,,,"",0.0,,-4,deny,manual,15.00,,true,true,"",,,,false,,,,,,,,,,,,,,,,,,lb,,,active
+6ft-dp-hdmi-hi-end-video-cable,6ft DP-HDMI Hi-End Video Cable,"",CAD4LESS,Electronics > Computers > Desktop Computers,Accessories,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,15.00,,true,true,"",,,,false,,,,,,,,,,,,,,,,,,lb,,15.00,active
+6ft-hdmi-hdmi-hi-end-video-cable,6ft HDMI-HDMI Hi-End Video cable,"",CAD4LESS,Electronics > Computers > Desktop Computers,Accessories,"",true,Title,Default Title,,,,,,,,"",0.0,,-6,deny,manual,15.00,,true,true,"",,,,false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cl1510-1,CADSTATION CL1510,"<table style=""width: 100%; border-collapse: collapse;"" border=""1"">
+  <tbody>
+    <tr>
+      <td><strong>Processor</strong></td>
+      <td>Intel® Core™ i5 14400 10 Core CPU</td>
+    </tr>
+    <tr>
+      <td><strong>System Board</strong></td>
+      <td>LGA-1700 B760 PCIEX16</td>
+    </tr>
+    <tr>
+      <td><strong>RAM</strong></td>
+      <td>32.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td><strong>Drive 1</strong></td>
+      <td>1.0 TB SSD NVME M.2</td>
+    </tr>
+    <tr>
+      <td><strong>Drive 2</strong></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>Controller</strong></td>
+      <td>4x SATA-III &amp; NVME</td>
+    </tr>
+    <tr>
+      <td><strong>RAID</strong></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>Graphics Card</strong></td>
+      <td>Nvidia RTX 4060 8GB GDDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+    </tr>
+    <tr>
+      <td><strong>Case</strong></td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td><strong>Power Supply</strong></td>
+      <td>400w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td><strong>Optical Drive</strong></td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td><strong>Ports</strong></td>
+      <td>1~2, 5 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+    </tr>
+    <tr>
+      <td><strong>OS</strong></td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td><strong>System Status</strong></td>
+      <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+    </tr>
+    <tr>
+      <td><strong>Input Devices</strong></td>
+      <td>USB keyboard &amp; Optical mouse</td>
+    </tr>
+    <tr>
+      <td><strong>Warranty</strong></td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td><strong>Tech Support</strong></td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i5,"Intel® Core™ i5, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,1699.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_cd37ce2c-47af-46b4-85e1-2ce8a929d332.webp?v=1709634066,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cl1520,CADSTATION CL1520,"<table border=""1"" style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td style=""width: 25%;""><b>Processor</b></td>
+    <td>Intel® Core™ i5 14600K 14 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>32.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0 TB SSD NVME M.2</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX 4080 16GB GDDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mid Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>600w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24X DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1~2.5 Gbps Ethernet Port</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i5,"Intel® Core™ i5, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2599.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx5105,CADSTATION CX5105,"<table width=""100%"" style=""width: 100%; border-collapse: collapse;"" border=""1"">
+  <tbody>
+    <tr>
+<td><strong>Processor</strong></td>
+<td>Intel Xeon W5 2455x 12 Core CPU 3.20/4.60 GHz</td>
+</tr>
+    <tr>
+<td><strong>System Board</strong></td>
+<td>LGA-4677 with W790 Chipset</td>
+</tr>
+    <tr>
+<td><strong>Drive 1</strong></td>
+<td>2.0TB SSD M.2 NVME Superfast</td>
+</tr>
+    <tr>
+<td><strong>Drive 2</strong></td>
+<td>2.0TB SATA HD 7200 RPM</td>
+</tr>
+    <tr>
+<td><strong>RAM</strong></td>
+<td>128.0 GB RAM DDR-5</td>
+</tr>
+    <tr>
+<td><strong>Controller</strong></td>
+<td>4x SATA-III &amp; NVME M.2</td>
+</tr>
+    <tr>
+<td><strong>Graphics Card</strong></td>
+      <td>
+        Nvidia RTX A4500 20GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+<td><strong>Case</strong></td>
+<td>Mid Tower ATX</td>
+</tr>
+    <tr>
+<td><strong>Power Supply</strong></td>
+<td>700w 24x7 Usage</td>
+</tr>
+    <tr>
+<td><strong>Optical Drive</strong></td>
+<td>24X DVDRW SATA</td>
+</tr>
+    <tr>
+<td><strong>Ports</strong></td>
+      <td>
+        1 &amp; 10 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB-C
+      </td>
+    </tr>
+    <tr>
+<td><strong>OS</strong></td>
+<td>Windows 11 Pro X64 DVD + License + COA</td>
+</tr>
+    <tr>
+<td><strong>System Status</strong></td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+<td><strong>Input Devices</strong></td>
+<td>Cordless Keyboard &amp; Optical Mouse</td>
+</tr>
+    <tr>
+<td><strong>RAID</strong></td>
+<td>N/A</td>
+</tr>
+    <tr>
+<td><strong>Warranty</strong></td>
+<td>3 Year</td>
+</tr>
+    <tr>
+<td><strong>Tech Support</strong></td>
+<td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+</tr>
+    <tr><td colspan=""2""><strong>***Actual product may look different***</strong></td></tr>
+  </tbody>
+</table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,6859.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx5110,CADSTATION CX5110,"<table width=""100%"" style=""width: 100%; border-collapse: collapse;"" border=""1"">
+  <tbody>
+    <tr>
+<td><strong>Processor</strong></td>
+<td>Intel Xeon W5 3435x 16 Core CPU 3.10/4.70 GHz</td>
+</tr>
+    <tr>
+<td><strong>System Board</strong></td>
+<td>LGA-4677 with W790 Chipset</td>
+</tr>
+    <tr>
+<td><strong>Drive 1</strong></td>
+<td>2.0TB SSD M.2 NVME Superfast</td>
+</tr>
+    <tr>
+<td><strong>Drive 2</strong></td>
+<td>4.0TB SATA HD 7200 RPM</td>
+</tr>
+    <tr>
+<td><strong>RAM</strong></td>
+<td>128.0 GB RAM DDR-5</td>
+</tr>
+    <tr>
+<td><strong>Controller</strong></td>
+<td>4x SATA-III &amp; NVME M.2</td>
+</tr>
+    <tr>
+      <td><strong>Graphics Card</strong></td>
+      <td>
+        Nvidia RTX A4500 20GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+<td><strong>Case</strong></td>
+<td>Mid Tower ATX</td>
+</tr>
+    <tr>
+<td><strong>Power Supply</strong></td>
+<td>700w 24x7 Usage</td>
+</tr>
+    <tr>
+<td><strong>Optical Drive</strong></td>
+<td>24X DVDRW SATA</td>
+</tr>
+    <tr>
+      <td><strong>Ports</strong></td>
+      <td>
+        1 &amp; 10 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB-C
+      </td>
+    </tr>
+    <tr>
+<td><strong>OS</strong></td>
+<td>Windows 11 Pro X64 DVD + License + COA</td>
+</tr>
+    <tr>
+      <td><strong>System Status</strong></td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+<td><strong>Input Devices</strong></td>
+<td>Cordless Keyboard &amp; Optical Mouse</td>
+</tr>
+    <tr>
+<td><strong>RAID</strong></td>
+<td>N/A</td>
+</tr>
+    <tr>
+<td><strong>Warranty</strong></td>
+<td>3 Year</td>
+</tr>
+    <tr>
+<td><strong>Tech Support</strong></td>
+<td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+</tr>
+    <tr><td colspan=""2""><strong>***Actual product may look different***</strong></td></tr>
+  </tbody>
+</table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,7683.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx5115,CADSTATION CX5115,"<table style=""width: 99.8573%; height: 723.263px;"" width=""100%"">
+<tbody>
+<tr style=""height: 35.6px;"">
+<td style=""width: 22.1547%; height: 35.6px;""><b>Processor</b></td>
+<td style=""width: 77.6314%; height: 35.6px;"">
+<p style=""text-align: left;"">Intel Xeon W7 2475X 20 Core CPU 2.60/4.80 GHz</p>
+</td>
+</tr>
+<tr style=""height: 39.8625px;"">
+<td style=""width: 22.1547%; height: 39.8625px;""><b>System Board</b></td>
+<td style=""width: 77.6314%; height: 39.8625px;"">LGA-4677 with W790 Chipset</td>
+</tr>
+<tr style=""height: 39.8625px;"">
+<td style=""width: 22.1547%; height: 39.8625px;""><b>Drive 1</b></td>
+<td style=""width: 77.6314%; height: 39.8625px;"">4.0TB SSD M.2 NVME Superfast</td>
+</tr>
+<tr style=""height: 39.8625px;"">
+<td style=""width: 22.1547%; height: 39.8625px;""><b>Drive 2</b></td>
+<td style=""width: 77.6314%; height: 39.8625px;"">4.0TB SATA HD 7200 RPM</td>
+</tr>
+<tr style=""height: 19.95px;"">
+<td style=""width: 22.1547%; height: 19.95px;""><b>Controller</b></td>
+<td style=""width: 77.6314%; height: 19.95px;"">4x SATA-III &amp; NVME M.2</td>
+</tr>
+<tr style=""height: 19.95px;"">
+<td style=""width: 22.1547%; height: 19.95px;""><b>RAM</b></td>
+<td style=""width: 77.6314%; height: 19.95px;"">256.0 GB RAM DDR-5</td>
+</tr>
+<tr style=""height: 74.8px;"">
+<td style=""width: 22.1547%; height: 74.8px;""><b>Graphics Card</b></td>
+<td style=""width: 77.6314%; height: 74.8px;"">
+<p>Nvidia RTX A6000 48GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</p>
+</td>
+</tr>
+<tr style=""height: 36px;"">
+<td style=""width: 22.1547%; height: 36px;""><b>Case</b></td>
+<td style=""width: 77.6314%; height: 36px;"">Mid Tower ATX</td>
+</tr>
+<tr style=""height: 39.8625px;"">
+<td style=""width: 22.1547%; height: 39.8625px;""><b>Power Supply</b></td>
+<td style=""width: 77.6314%; height: 39.8625px;"">900w 24x7 Usage  </td>
+</tr>
+<tr style=""height: 39.8625px;"">
+<td style=""width: 22.1547%; height: 39.8625px;""><b>Optical Drive</b></td>
+<td style=""width: 77.6314%; height: 39.8625px;"">24X DVDRW SATA</td>
+</tr>
+<tr style=""height: 66.8px;"">
+<td style=""width: 22.1547%; height: 66.8px;""><b>Ports</b></td>
+<td style=""width: 77.6314%; height: 66.8px;"">1 &amp; 10 Gbps Ethernet Port <br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB-C</td>
+</tr>
+<tr style=""height: 28.9875px;"">
+<td style=""width: 22.1547%; height: 28.9875px;""><b>OS</b></td>
+<td style=""width: 77.6314%; height: 28.9875px;"">Windows 11 Pro X64 DVD + License + COA</td>
+</tr>
+<tr style=""height: 61.6625px;"">
+<td style=""width: 22.1547%; height: 61.6625px;""><b>System Status</b></td>
+<td style=""width: 77.6314%; height: 61.6625px;"">Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+</tr>
+<tr style=""height: 46.15px;"">
+<td style=""width: 22.1547%; height: 46.15px;""><b>Input Devices</b></td>
+<td style=""width: 77.6314%; height: 46.15px;"">Cordless Keyboard &amp; Optical Mouse</td>
+</tr>
+<tr style=""height: 32.6375px;"">
+<td style=""width: 22.1547%; height: 32.6375px;""><b>RAID</b></td>
+<td style=""width: 77.6314%; height: 32.6375px;"">N/A</td>
+</tr>
+<tr style=""height: 29.6125px;"">
+<td style=""width: 22.1547%; height: 29.6125px;""><b>Warranty</b></td>
+<td style=""width: 77.6314%; height: 29.6125px;"">3 Year</td>
+</tr>
+<tr style=""height: 31.8625px;"">
+<td style=""width: 22.1547%; height: 31.8625px;""><b>Tech Support</b></td>
+<td style=""width: 77.6314%; height: 31.8625px;"">Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+</tr>
+<tr>
+<td colspan=""2"">***Actual product may look different***</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p><br></p>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,12765.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx5120,CADSTATION CX5120,"<p><br></p>
+<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 30%; background-color: #EFF0F2; font-weight: bold;"">Processor</td>
+      <td style=""width: 70%;"">Intel Xeon W7 3455 24 Core CPU 2.60/4.80 GHz</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">System Board</td>
+      <td>LGA-4677 with W790 Chipset</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Drive 1</td>
+      <td>4.0TB SSD M.2 NVME Superfast</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Drive 2</td>
+      <td>4.0TB SATA HD 7200 RPM</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">RAM</td>
+      <td>256.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME M.2</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Graphics Card</td>
+      <td>
+        Nvidia RTX A6000 48GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Case</td>
+      <td>Mid Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Power Supply</td>
+      <td>900w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Optical Drive</td>
+      <td>24X DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Ports</td>
+      <td>
+        1 &amp; 10 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB-C
+      </td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">System Status</td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Input Devices</td>
+      <td>Cordless Keyboard &amp; Optical Mouse</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td style=""background-color: #EFF0F2; font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+    <tr>
+      <td colspan=""2"" style=""text-align: center; font-weight: bold;"">***Actual product may look different***</td>
+    </tr>
+  </tbody>
+</table>
+<p><br></p>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,13681.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx5125,CADSTATION CX5125,"<table style=""width: 100%; border-collapse: collapse;"" border=""1""> <tbody> <tr>
+<td><strong>Processor</strong></td>
+<td>Intel Xeon W9 3475X 36 Core CPU 2.20/4.80 GHz</td>
+</tr> <tr>
+<td><strong>System Board</strong></td>
+<td>LGA-4677 with W790 Chipset</td>
+</tr> <tr>
+<td><strong>Drive 1</strong></td>
+<td>4.0TB SSD M.2 NVME Superfast</td>
+</tr> <tr>
+<td><strong>Drive 2</strong></td>
+<td>4.0TB SSD M.2 NVME</td>
+</tr> <tr>
+<td><strong>RAM</strong></td>
+<td>512 GB RAM DDR-5</td>
+</tr> <tr>
+<td><strong>Controller</strong></td>
+<td>4x SATA-III &amp; NVME M.2</td>
+</tr> <tr> <td><strong>Graphics Card</strong></td> <td> Nvidia RTX A6000 48GB DDR6<br> 7680 x 4320 Resolution<br> 4x Monitor Supported </td> </tr> <tr>
+<td><strong>Case</strong></td>
+<td>Mid Tower ATX</td>
+</tr> <tr>
+<td><strong>Power Supply</strong></td>
+<td>900w 24x7 Usage</td>
+</tr> <tr>
+<td><strong>Optical Drive</strong></td>
+<td>24X DVDRW SATA</td>
+</tr> <tr> <td><strong>Ports</strong></td> <td> 1 &amp; 10 Gbps Ethernet Port<br> Stereo Audio<br> Front and Rear USB 2.0 + USB 3.0 + USB-C </td> </tr> <tr>
+<td><strong>OS</strong></td>
+<td>Windows 11 Pro X64 DVD + License + COA</td>
+</tr> <tr> <td><strong>System Status</strong></td> <td> Windows installed and activated<br> No Bloatware<br> Fully Configured and Tested </td> </tr> <tr>
+<td><strong>Input Devices</strong></td>
+<td>Cordless Keyboard &amp; Optical Mouse</td>
+</tr> <tr>
+<td><strong>RAID</strong></td>
+<td>N/A</td>
+</tr> <tr>
+<td><strong>Warranty</strong></td>
+<td>3 Year</td>
+</tr> <tr>
+<td><strong>Tech Support</strong></td>
+<td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+</tr> <tr><td colspan=""2"" style=""text-align: center;""><strong>***Actual product may look different***</strong></td></tr> </tbody> </table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,16931.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx5130,CADSTATION CX5130,"<table width=""100%"" style=""width: 100%; border-collapse: collapse;"" border=""1"">
+  <tbody>
+    <tr>
+      <td><strong>Processor</strong></td>
+      <td>Intel Xeon W9 3495X 56 Core CPU 1.90/4.80 GHz</td>
+    </tr>
+    <tr>
+      <td><strong>System Board</strong></td>
+      <td>LGA-4677 with W790 Chipset</td>
+    </tr>
+    <tr>
+      <td><strong>Drive 1</strong></td>
+      <td>4.0TB SSD M.2 NVME Superfast</td>
+    </tr>
+    <tr>
+      <td><strong>Drive 2</strong></td>
+      <td>4.0TB SSD M.2 NVME</td>
+    </tr>
+    <tr>
+      <td><strong>RAM</strong></td>
+      <td>512.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td><strong>Controller</strong></td>
+      <td>4x SATA-III &amp; NVME M.2</td>
+    </tr>
+    <tr>
+      <td><strong>Graphics Card</strong></td>
+      <td>
+        Nvidia RTX A6000 48GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Case</strong></td>
+      <td>Mid Tower ATX</td>
+    </tr>
+    <tr>
+      <td><strong>Power Supply</strong></td>
+      <td>900w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td><strong>Optical Drive</strong></td>
+      <td>24X DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td><strong>Ports</strong></td>
+      <td>
+        1 &amp; 10 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB-C
+      </td>
+    </tr>
+    <tr>
+      <td><strong>OS</strong></td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td><strong>System Status</strong></td>
+      <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+    </tr>
+    <tr>
+      <td><strong>Input Devices</strong></td>
+      <td>Cordless Keyboard &amp; Optical Mouse</td>
+    </tr>
+    <tr>
+      <td><strong>RAID</strong></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>Warranty</strong></td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td><strong>Tech Support</strong></td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+    <tr>
+      <td colspan=""2""><strong>***Actual product may look different***</strong></td>
+    </tr>
+  </tbody>
+</table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,19830.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cadstation-cx51305,CADSTATION CX5135,"<table style=""width: 100%; border-collapse: collapse;"" border=""1"">
+  <tbody>
+    <tr>
+<td>Processor</td>
+<td>Intel Xeon W9 3495X 56 Core CPU 1.90/4.80 GHz</td>
+</tr>
+    <tr>
+<td>System Board</td>
+<td>LGA-4677 with W790 Chipset</td>
+</tr>
+    <tr>
+<td>Drive 1</td>
+<td>4.0TB SSD M.2 NVME Superfast</td>
+</tr>
+    <tr>
+<td>Drive 2</td>
+<td>4.0TB SSD M.2 NVME</td>
+</tr>
+    <tr>
+<td>RAM</td>
+<td>512.0 GB RAM DDR-5</td>
+</tr>
+    <tr>
+<td>Controller</td>
+<td>4x SATA-III &amp; NVME M.2</td>
+</tr>
+    <tr>
+      <td>Graphics Card</td>
+      <td>
+        Nvidia RTX A6000 ADA 48GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+<td>Case</td>
+<td>Mid Tower ATX</td>
+</tr>
+    <tr>
+<td>Power Supply</td>
+<td>900w 24x7 Usage</td>
+</tr>
+    <tr>
+<td>Optical Drive</td>
+<td>24X DVDRW SATA</td>
+</tr>
+    <tr>
+      <td>Ports</td>
+      <td>
+        1 &amp; 10 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB-C
+      </td>
+    </tr>
+    <tr>
+<td>OS</td>
+<td>Windows 11 Pro X64 DVD + License + COA</td>
+</tr>
+    <tr>
+      <td>System Status</td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+<td>Input Devices</td>
+<td>Cordless Keyboard &amp; Optical Mouse</td>
+</tr>
+    <tr>
+<td>RAID</td>
+<td>N/A</td>
+</tr>
+    <tr>
+<td>Warranty</td>
+<td>3 Year</td>
+</tr>
+    <tr>
+<td>Tech Support</td>
+<td>Yes | Live Person | Toll Free: 800-GEN-6664</td>
+</tr>
+    <tr><td colspan=""2""><strong>***Actual product may look different***</strong></td></tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel Xeon,"Intel® Xeon®, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,24875.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl1505,CADSTATION CL1505,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 25%; font-weight: bold;"">Processor</td>
+      <td>Intel® Core™ i5 14400 10 Core CPU</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Board</td>
+      <td>LGA-1700 B760 PCIEX16</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAM</td>
+      <td>32.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 1</td>
+      <td>1.0 TB SSD NVME M.2</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Graphics Card</td>
+      <td>Nvidia RTX 4060 8GB GDDR6<br>7680 x 4320 Resolution<br>4 Monitor Supported</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Case</td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Power Supply</td>
+      <td>400w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Optical Drive</td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Ports</td>
+      <td>1~2.5 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Status</td>
+      <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Input Devices</td>
+      <td>USB keyboard &amp; optical mouse</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+  </tbody>
+</table>
+<p><br></p>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i5,"Intel® Core™ i5, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,1369.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/Minitower__24888_6e6fccc8-ca68-4396-a530-32061fbb44f9.webp?v=1709107898,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl1515,CADSTATION CL1515,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""font-weight: bold;"">Processor</td>
+      <td>Intel® Core™ i5 14600K 14 Core CPU</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Board</td>
+      <td>LGA-1700 B760 PCIEX16</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAM</td>
+      <td>32.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 1</td>
+      <td>2.0 TB SSD NVME M.2</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 2</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Graphics Card</td>
+      <td>Nvidia RTX 4070-TI 12GB GDDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Case</td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Power Supply</td>
+      <td>400w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Optical Drive</td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Ports</td>
+      <td>1~2.5 Gbps Ethernet Port</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Status</td>
+      <td>Windows installed and activated</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Stereo Audio</td>
+      <td>No Bloatware</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Front and Rear USB</td>
+      <td>2.0 + USB 3.0 + USB C</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Fully Configured</td>
+      <td>and Tested</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Input Devices</td>
+      <td>USB keyboard &amp; optical mouse</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i5,"Intel® Core™ i5, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2099.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f.jpg?v=1709204663,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2105,CADSTATION CL2105,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 25%; font-weight: bold;"">Processor</td>
+      <td style=""width: 75%;"">Intel® Core™ i7 14700 16 Core CPU</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Board</td>
+      <td>LGA-1700 B760 PCIEX16</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAM</td>
+      <td>32.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 1</td>
+      <td>1.0 TB SSD NVME M.2</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 2</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Graphics Card</td>
+      <td>
+        Nvidia GTX1650 4GB GDDR5<br>
+        Nvidia RTX 4070 12GB GDDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Case</td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Power Supply</td>
+      <td>400w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Optical Drive</td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Ports</td>
+      <td>1~2.5 Gbps Ethernet Port</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Status</td>
+      <td>Windows installed and activated</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;""></td>
+      <td>Stereo Audio</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;""></td>
+      <td>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Input Devices</td>
+      <td>USB keyboard &amp; optical mouse</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,1849.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_314cc635-3f38-4931-ad9a-bcd69805eae1.jpg?v=1709204698,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2110,CADSTATION CL2110,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td><b>Processor</b></td>
+    <td>Intel® Core™ i7 14700 16 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>64.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0 TB SSD NVME M.2</td>
+  </tr>
+  <tr>
+    <td><b>Drive 2</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX 4070 12GB GDDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>400w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW Usage</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1~2.5 Gbps Ethernet Port</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated</td>
+  </tr>
+  <tr>
+    <td><b>Stereo Audio</b></td>
+    <td>Stereo Audio</td>
+  </tr>
+  <tr>
+    <td><b>No Bloatware</b></td>
+    <td>No Bloatware</td>
+  </tr>
+  <tr>
+    <td><b>USB Ports</b></td>
+    <td>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Fully Configured and Tested</b></td>
+    <td>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free 800-GEN-6664</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2069.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_10a95cc6-1e0e-4747-9c0d-d2f57aba5ee3.jpg?v=1709204709,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2115,CADSTATION CL2115,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td><b>Processor</b></td>
+    <td>Intel® Core™ i7 14700 16 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0 TB SSD NVME M.2</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>64.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX 4070-TI 12GB GDDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>400w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1~2.5 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free 800-GEN-6664</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2359.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_47aafe18-6583-4ff2-bdda-317e2af8759d.jpg?v=1709204721,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2120,CADSTATION CL2120,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td><b>Processor</b></td>
+    <td>Intel® Core™ i7 14700 16 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>1.0 TB SSD NVME M.2</td>
+  </tr>
+  <tr>
+    <td><b>Drive 2</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME M.2</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX A4000 16GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>600w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Extra</b></td>
+    <td>12-in-1 Memory Card Reader</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free 800-GEN-6664</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2579.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_85f14e46-c7f9-4cf7-8449-761668be6bd1.jpg?v=1709204734,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2125,CADSTATION CL2125,"<p> </p>
+<table width=""354"" style=""height: 572.531px; width: 559px;"" data-mce-fragment=""1"" data-mce-style=""height: 1021px; width: 559px;"">
+<tbody data-mce-fragment=""1"">
+<tr style=""height: 87.375px;"" data-mce-fragment=""1"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 87.375px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Processor</b></td>
+<td style=""width: 144.047px; height: 87.375px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 19px;"">
+<span style=""font-weight: 400;"" data-mce-style=""font-weight: 400;"">Intel</span><span style=""font-weight: 400;"" data-mce-style=""font-weight: 400;"">®</span><span style=""font-weight: 400;"" data-mce-style=""font-weight: 400;""> Core™ i7 14700 16 Core CPU</span>
+</td>
+<td style=""width: 142.547px; height: 87.375px;"" data-mce-fragment=""1""><b data-mce-fragment=""1"">System Board</b></td>
+<td style=""width: 144.156px; height: 87.375px;"" data-mce-fragment=""1"">LGA-1700 B760 PCIEX16 <br>
+</td>
+</tr>
+<tr style=""height: 45.9219px;"" data-mce-fragment=""1"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 45.9219px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Drive 1</b></td>
+<td style=""width: 144.047px; height: 45.9219px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 19px;"">1.0 TB SSD NVME M.2</td>
+<td style=""width: 142.547px; height: 45.9219px;""><b data-mce-fragment=""1"">Drive 2</b></td>
+<td style=""width: 144.156px; height: 45.9219px;"">N/A</td>
+</tr>
+<tr style=""height: 36.7812px;"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 36.7812px;"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Drive 2</b></td>
+<td style=""width: 144.047px; height: 36.7812px;"" data-mce-style=""width: 144.453px; height: 19px;"">N/A</td>
+<td data-mce-fragment=""1"" style=""width: 142.547px; height: 36.7812px;"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Tech Support</b></td>
+<td data-mce-fragment=""1"" style=""width: 144.156px; height: 36.7812px;"" data-mce-style=""width: 144.453px; height: 19px;"">Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+</tr>
+<tr style=""height: 45.9219px;"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 45.9219px;"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Controller</b></td>
+<td style=""width: 144.047px; height: 45.9219px;"" data-mce-style=""width: 144.453px; height: 19px;"">4x SATA-III &amp; NVME</td>
+<td style=""width: 142.547px; height: 45.9219px;"" data-mce-fragment=""1""><b data-mce-fragment=""1"">RAM</b></td>
+<td style=""width: 144.156px; height: 45.9219px;"" data-mce-fragment=""1"">64.0 GB RAM DDR-5</td>
+</tr>
+<tr style=""height: 45.9219px;"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 45.9219px;"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">RAID</b></td>
+<td style=""width: 144.047px; height: 45.9219px;"" data-mce-style=""width: 144.453px; height: 19px;"">N/A</td>
+<td style=""width: 142.547px; height: 45.9219px;"" data-mce-fragment=""1""><b data-mce-fragment=""1"">Case</b></td>
+<td style=""width: 144.156px; height: 45.9219px;"" data-mce-fragment=""1"">Mini Tower ATX</td>
+</tr>
+<tr style=""height: 88.3438px;"" data-mce-fragment=""1"" data-mce-style=""height: 58px;"">
+<td style=""width: 100.25px; height: 88.3438px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 58px;""><b data-mce-fragment=""1"">Graphics Card</b></td>
+<td style=""width: 144.047px; height: 88.3438px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 58px;"">Nvidia RTX A4000 16GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported<br>
+</td>
+<td style=""width: 142.547px; height: 88.3438px;"" data-mce-fragment=""1""><b data-mce-fragment=""1"">Ports</b></td>
+<td style=""width: 144.156px; height: 88.3438px;"" data-mce-fragment=""1"">1 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C<br>
+</td>
+</tr>
+<tr style=""height: 45.9219px;"" data-mce-fragment=""1"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 45.9219px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Power Supply</b></td>
+<td style=""width: 144.047px; height: 45.9219px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 19px;"">600w 24x7 Usage</td>
+<td style=""width: 142.547px; height: 45.9219px;"" data-mce-fragment=""1""><b data-mce-fragment=""1"">Optical Drive</b></td>
+<td style=""width: 144.156px; height: 45.9219px;"" data-mce-fragment=""1"">24x DVDRW <span style=""font-weight: 400;"" data-mce-fragment=""1"" data-mce-style=""font-weight: 400;"">SATA</span>
+</td>
+</tr>
+<tr style=""height: 97.9688px;"" data-mce-fragment=""1"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 97.9688px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">OS</b></td>
+<td style=""width: 144.047px; height: 97.9688px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 19px;"">Windows 11 Pro X64 DVD + License + COA<br>
+</td>
+<td style=""width: 142.547px; height: 97.9688px;""><b data-mce-fragment=""1"">System Status</b></td>
+<td style=""width: 144.156px; height: 97.9688px;"">Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested<br>
+</td>
+</tr>
+<tr style=""height: 39.1875px;"" data-mce-fragment=""1"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 39.1875px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Input Devices</b></td>
+<td style=""width: 144.047px; height: 39.1875px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 19px;"">USB keyboard &amp; optical mouse</td>
+<td style=""width: 142.547px; height: 39.1875px;""><b data-mce-fragment=""1"">Extra</b></td>
+<td style=""width: 144.156px; height: 39.1875px;"">12-in-1 Memory Card Reader</td>
+</tr>
+<tr style=""height: 39.1875px;"" data-mce-fragment=""1"" data-mce-style=""height: 19px;"">
+<td style=""width: 100.25px; height: 39.1875px;"" data-mce-fragment=""1"" data-mce-style=""width: 100.422px; height: 19px;""><b data-mce-fragment=""1"">Warranty</b></td>
+<td style=""width: 144.047px; height: 39.1875px;"" data-mce-fragment=""1"" data-mce-style=""width: 144.453px; height: 19px;"">3 Year</td>
+<td style=""width: 142.547px; height: 39.1875px;"" data-mce-fragment=""1""><b data-mce-fragment=""1"">System Status</b></td>
+<td style=""width: 144.156px; height: 39.1875px;"" data-mce-fragment=""1"">Windows installed and activated</td>
+</tr>
+</tbody>
+</table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2799.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_d10c2e02-7cfd-413c-ae7b-0738c67e70dd.jpg?v=1709204746,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2130,CADSTATION CL2130,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td><b>Processor</b></td>
+    <td>Intel® Core™ i7 14700 16 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0 TB SSD NVME M.2 Superfast</td>
+  </tr>
+  <tr>
+    <td><b>Drive 2</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>96.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX A4000 16GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>600w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>Extra</b></td>
+    <td>12-in-1 Memory Card Reader</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free 800-GEN-6664</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,2899.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_0d4f0d8a-3bb8-4149-8089-58a32abf9e67.jpg?v=1709204757,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2135,CADSTATION CL2135,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td><b>Processor</b></td>
+    <td>Intel® Core™ i7 14700 16 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0 TB SSD NVME M.2 Superfast</td>
+  </tr>
+  <tr>
+    <td><b>Drive 2</b></td>
+    <td>2.0 TB SATA HD 7200 RPM</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>128.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>600w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1 Gbps Ethernet Port, Stereo Audio, Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX A4000 16GB DDR6, 7680 x 4320 Resolution, 4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated, No Bloatware, Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Extra</b></td>
+    <td>12-in-1 Memory Card Reader</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,3159.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_5583a01f-a0dc-4fbf-bc23-eedf5a3fb15c.jpg?v=1709204768,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2140,CADSTATION CL2140,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td><b>Processor</b></td>
+    <td>Intel® Core™ i7 14700 16 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 B760 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0 TB SSD NVME M.2 Superfast</td>
+  </tr>
+  <tr>
+    <td><b>Drive 2</b></td>
+    <td>2.0 TB SATA HD 7200 RPM</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>128.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX A5000 24GB DDR6 <br>7680 x 4320 Resolution <br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1 Gbps Ethernet Port <br>Stereo Audio <br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>700w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated <br>No Bloatware <br>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>USB keyboard &amp; optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Extra</b></td>
+    <td>12-in-1 Memory Card Reader</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,4599.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_4f67c86f-7338-49e5-9573-db85425fdc75.jpg?v=1709204784,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl2145,CADSTATION CL2145,"<table style=""width:100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 50%;""><b>Processor</b></td>
+      <td>Intel® Core™ i7 14700 16 Core CPU</td>
+    </tr>
+    <tr>
+      <td><b>System Board</b></td>
+      <td>LGA-1700 Z790 PCIEX16</td>
+    </tr>
+    <tr>
+      <td><b>RAM</b></td>
+      <td>192.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td><b>Controller</b></td>
+      <td>4x SATA-III &amp; NVME</td>
+    </tr>
+    <tr>
+      <td><b>Drive 1</b></td>
+      <td>2.0 TB SSD NVME M.2 Superfast</td>
+    </tr>
+    <tr>
+      <td><b>Drive 2</b></td>
+      <td>4.0 TB SATA HD 7200 RPM</td>
+    </tr>
+    <tr>
+      <td><b>RAID</b></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><b>Case</b></td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td><b>Graphics Card</b></td>
+      <td>Nvidia RTX A5000 24GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+    </tr>
+    <tr>
+      <td><b>Ports</b></td>
+      <td>1 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+    </tr>
+    <tr>
+      <td><b>Optical Drive</b></td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td><b>Power Supply</b></td>
+      <td>700w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td><b>Warranty</b></td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td><b>Tech Support</b></td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+    <tr>
+      <td><b>OS</b></td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td><b>System Status</b></td>
+      <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+    </tr>
+    <tr>
+      <td><b>Input Devices</b></td>
+      <td>USB keyboard &amp; optical mouse</td>
+    </tr>
+    <tr>
+      <td><b>Extra</b></td>
+      <td>12-in-1 Memory Card Reader</td>
+    </tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i7,"Intel® Core™ i7, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,4989.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_5e4a7a95-df07-44a8-9a1b-9d02cd74f7ca.jpg?v=1709204800,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3105,CADSTATION CL3105,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 25%; font-weight: bold;"">Processor</td>
+      <td style=""width: 75%;"">Intel® Core™ i9 14900 24 Core CPU</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Board</td>
+      <td>LGA-1700 Z790 PCIEX16</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 1</td>
+      <td>1.0TB SSD M.2 NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 2</td>
+      <td>2.0TB SATA HD 7200RPM</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAM</td>
+      <td>64.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Graphics Card</td>
+      <td>Nvidia RTX A4000 16GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Ports</td>
+      <td>1~2, 5 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Case</td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Optical Drive</td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Power Supply</td>
+      <td>700w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Status</td>
+      <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Input Devices</td>
+      <td>Cordless keyboard &amp; Optical mouse</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,3169.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_c9bce8e9-d262-4e44-add5-c4a7c9f2ffd3.jpg?v=1709204811,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3110,CADSTATION CL3110,"<table style=""width: 100%; border-collapse: collapse;""> <tbody> <tr> <td style=""width: 25%; font-weight: bold;"">Processor</td> <td style=""width: 75%;"">Intel® Core™ i9 14900 24 Core CPU</td> </tr> <tr> <td style=""font-weight: bold;"">System Board</td> <td>LGA-1700 Z790 PCIEX16</td> </tr> <tr> <td style=""font-weight: bold;"">Drive 1</td> <td>2.0TB SSD M.2 NVME</td> </tr> <tr> <td style=""font-weight: bold;"">Drive 2</td> <td>4.0TB SATA HD 7200RPM</td> </tr> <tr> <td style=""font-weight: bold;"">Controller</td> <td>4x SATA-III &amp; NVME</td> </tr> <tr> <td style=""font-weight: bold;"">RAM</td> <td>96.0 GB RAM DDR-5</td> </tr> <tr> <td style=""font-weight: bold;"">Graphics Card</td> <td> Nvidia RTX A4000 16GB DDR6<br> 7680 x 4320 Resolution<br> 4x Monitor Supported </td> </tr> <tr> <td style=""font-weight: bold;"">Ports</td> <td> 1~2, 5 Gbps Ethernet Port<br> Stereo Audio<br> Front and Rear USB 2.0 + USB 3.0 + USB C </td> </tr> <tr> <td style=""font-weight: bold;"">Case</td> <td>Mini Tower ATX</td> </tr> <tr> <td style=""font-weight: bold;"">RAID</td> <td>N/A</td> </tr> <tr> <td style=""font-weight: bold;"">Optical Drive</td> <td>24x DVDRW SATA</td> </tr> <tr> <td style=""font-weight: bold;"">Power Supply</td> <td>700w 24x7 Usage</td> </tr> <tr> <td style=""font-weight: bold;"">OS</td> <td>Windows 11 Pro X64 DVD + License + COA</td> </tr> <tr> <td style=""font-weight: bold;"">System Status</td> <td> Windows installed and activated<br> No Bloatware<br> Fully Configured and Tested </td> </tr> <tr> <td style=""font-weight: bold;"">Input Devices</td> <td>Cordless keyboard &amp; Optical mouse</td> </tr> <tr> <td style=""font-weight: bold;"">Warranty</td> <td>3 Year</td> </tr> <tr> <td style=""font-weight: bold;"">Tech Support</td> <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td> </tr> </tbody> </table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,3469.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_ded9cd8e-cd4d-45b0-b129-f64e27edcfbd.jpg?v=1709204824,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3115,CADSTATION CL3115,"<table style=""width: 100%; border-collapse: collapse;""> <tbody> <tr> <td style=""width: 25%; font-weight: bold;"">Processor</td> <td style=""width: 75%;"">Intel® Core™ i9 14900 24-Core CPU</td> </tr> <tr> <td style=""font-weight: bold;"">System Board</td> <td>LGA-1700 Z790 PCIEX16</td> </tr> <tr> <td style=""font-weight: bold;"">Drive 1</td> <td>2.0TB SSD M.2 NVME Superfast</td> </tr> <tr> <td style=""font-weight: bold;"">Drive 2</td> <td>4.0TB SATA HD 7200 RPM</td> </tr> <tr> <td style=""font-weight: bold;"">RAID</td> <td>N/A</td> </tr> <tr> <td style=""font-weight: bold;"">RAM</td> <td>128.0 GB DDR-5</td> </tr> <tr> <td style=""font-weight: bold;"">Graphics Card</td> <td> Nvidia RTX A4000 16GB DDR6<br> 7680 x 4320 Resolution<br> 4x Monitor Supported </td> </tr> <tr> <td style=""font-weight: bold;"">Ports</td> <td> 1~2, 5 Gbps Ethernet Port<br> Stereo Audio<br> Front and Rear USB 2.0 + USB 3.0 + USB C </td> </tr> <tr> <td style=""font-weight: bold;"">Case</td> <td>Mini Tower ATX</td> </tr> <tr> <td style=""font-weight: bold;"">Controller</td> <td>4x SATA-III &amp; NVME M.2</td> </tr> <tr> <td style=""font-weight: bold;"">Power Supply</td> <td>700W 24x7 Usage</td> </tr> <tr> <td style=""font-weight: bold;"">Optical Drive</td> <td>24x DVDRW SATA</td> </tr> <tr> <td style=""font-weight: bold;"">OS</td> <td>Windows 11 Pro X64 DVD + License + COA</td> </tr> <tr> <td style=""font-weight: bold;"">System Status</td> <td> Windows installed and activated<br> No Bloatware<br> Fully Configured and Tested </td> </tr> <tr> <td style=""font-weight: bold;"">Input Devices</td> <td>Cordless keyboard &amp; Optical mouse</td> </tr> <tr> <td style=""font-weight: bold;"">Warranty</td> <td>3 Year</td> </tr> <tr> <td style=""font-weight: bold;"">Tech Support</td> <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td> </tr> </tbody> </table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,3589.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_866a87a4-e9d9-4d1e-a904-683567090245.jpg?v=1709204835,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3120,CADSTATION CL3120,"<table style=""width: 100%; border-collapse: collapse;"" border=""1"">
+  <tbody>
+    <tr>
+<td><strong>Processor</strong></td>
+<td>Intel® Core™ i9 14900 24 Core CPU</td>
+</tr>
+    <tr>
+<td><strong>System Board</strong></td>
+<td>LGA-1700 Z790 PCIEX16</td>
+</tr>
+    <tr>
+<td><strong>Drive 1</strong></td>
+<td>2.0TB SSD M.2 NVME Superfast</td>
+</tr>
+    <tr>
+<td><strong>Drive 2</strong></td>
+<td>4.0TB SATA HD 7200 RPM</td>
+</tr>
+    <tr>
+<td><strong>Controller</strong></td>
+<td>4x SATA-III &amp; NVME M.2</td>
+</tr>
+    <tr>
+<td><strong>RAM</strong></td>
+<td>128.0 GB RAM DDR-5</td>
+</tr>
+    <tr>
+<td><strong>RAID</strong></td>
+<td>N/A</td>
+</tr>
+    <tr>
+<td><strong>Case</strong></td>
+<td>Mini Tower ATX</td>
+</tr>
+    <tr>
+      <td><strong>Graphics Card</strong></td>
+      <td>
+        Nvidia RTX A5000 24GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Ports</strong></td>
+      <td>
+        1~2, 5 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB C
+      </td>
+    </tr>
+    <tr>
+<td><strong>Power Supply</strong></td>
+<td>700w 24x7 Usage</td>
+</tr>
+    <tr>
+<td><strong>Optical Drive</strong></td>
+<td>24x DVDRW SATA</td>
+</tr>
+    <tr>
+      <td><strong>OS</strong></td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td><strong>System Status</strong></td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+<td><strong>Input Devices</strong></td>
+<td>Cordless keyboard &amp; Optical mouse</td>
+</tr>
+    <tr>
+<td><strong>Warranty</strong></td>
+<td>3 Year</td>
+</tr>
+    <tr>
+<td><strong>Tech Support</strong></td>
+<td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+</tr>
+  </tbody>
+</table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,5199.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_81de0672-1161-4ff9-bdce-d54751f04b62.jpg?v=1709204886,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3125,CADSTATION CL3125,"<table border=""1"" style=""width: 100%; border-collapse: collapse;"">
+  <tr>
+    <td style=""width: 25%;""><b>Processor</b></td>
+    <td>Intel® Core™ i9 14900 24 Core CPU</td>
+  </tr>
+  <tr>
+    <td><b>System Board</b></td>
+    <td>LGA-1700 Z790 PCIEX16</td>
+  </tr>
+  <tr>
+    <td><b>Drive 1</b></td>
+    <td>2.0TB SSD M.2 NVME Superfast</td>
+  </tr>
+  <tr>
+    <td><b>Drive 2</b></td>
+    <td>4.0TB SSD M.2 NVME</td>
+  </tr>
+  <tr>
+    <td><b>Controller</b></td>
+    <td>4x SATA-III &amp; NVME M.2</td>
+  </tr>
+  <tr>
+    <td><b>RAID</b></td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td><b>RAM</b></td>
+    <td>192.0 GB RAM DDR-5</td>
+  </tr>
+  <tr>
+    <td><b>Graphics Card</b></td>
+    <td>Nvidia RTX A5000 24GB DDR6<br>7680 x 4320 Resolution<br>4x Monitor Supported</td>
+  </tr>
+  <tr>
+    <td><b>Ports</b></td>
+    <td>1~2, 5 Gbps Ethernet Port<br>Stereo Audio<br>Front and Rear USB 2.0 + USB 3.0 + USB C</td>
+  </tr>
+  <tr>
+    <td><b>Case</b></td>
+    <td>Mini Tower ATX</td>
+  </tr>
+  <tr>
+    <td><b>Optical Drive</b></td>
+    <td>24x DVDRW SATA</td>
+  </tr>
+  <tr>
+    <td><b>Power Supply</b></td>
+    <td>700w 24x7 Usage</td>
+  </tr>
+  <tr>
+    <td><b>OS</b></td>
+    <td>Windows 11 Pro X64 DVD + License + COA</td>
+  </tr>
+  <tr>
+    <td><b>System Status</b></td>
+    <td>Windows installed and activated<br>No Bloatware<br>Fully Configured and Tested</td>
+  </tr>
+  <tr>
+    <td><b>Input Devices</b></td>
+    <td>Cordless keyboard &amp; Optical mouse</td>
+  </tr>
+  <tr>
+    <td><b>Warranty</b></td>
+    <td>3 Year</td>
+  </tr>
+  <tr>
+    <td><b>Tech Support</b></td>
+    <td>Yes | Live Person | Via Toll Free 800-GEN-6664</td>
+  </tr>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,5569.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_7899a4a8-a0e2-40a5-b002-406e572c5399.jpg?v=1709204897,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3130,CADSTATION CL3130,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 30%; font-weight: bold;"">Processor</td>
+      <td style=""width: 70%;"">Intel® Core™ i9 14900 24 Core CPU</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Board</td>
+      <td>LGA-1700 Z790 PCIEX16</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 1</td>
+      <td>2.0TB SSD M.2 NVME Superfast</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 2</td>
+      <td>4.0TB SSD M.2 NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME M.2</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAM</td>
+      <td>128.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Case</td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Graphics Card</td>
+      <td>
+        Nvidia RTX A6000 48GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Ports</td>
+      <td>
+        1~2, 5 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB C
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Power Supply</td>
+      <td>700w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Optical Drive</td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Status</td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Input Devices</td>
+      <td>Cordless keyboard &amp; Optical mouse</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+  </tbody>
+</table>",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,8399.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_9ef9f384-aef2-4b82-a2b8-8c834d5c3310.jpg?v=1709204907,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+cl3135,CADSTATION CL3135,"<table style=""width: 100%; border-collapse: collapse;"">
+  <tbody>
+    <tr>
+      <td style=""width: 25%; font-weight: bold;"">Processor</td>
+      <td style=""width: 75%;"">Intel® Core™ i9 14900 24 Core CPU</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Board</td>
+      <td>LGA-1700 Z790 PCIEX16</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 1</td>
+      <td>2.0TB SSD M.2 NVME Superfast</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Drive 2</td>
+      <td>4.0TB SSD M.2 NVME</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Controller</td>
+      <td>4x SATA-III &amp; NVME M.2</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Case</td>
+      <td>Mini Tower ATX</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAID</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">RAM</td>
+      <td>192.0 GB RAM DDR-5</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Graphics Card</td>
+      <td>
+        Nvidia RTX A6000 48GB DDR6<br>
+        7680 x 4320 Resolution<br>
+        4x Monitor Supported
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Ports</td>
+      <td>
+        1~2, 5 Gbps Ethernet Port<br>
+        Stereo Audio<br>
+        Front and Rear USB 2.0 + USB 3.0 + USB C
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Power Supply</td>
+      <td>700w 24x7 Usage</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Optical Drive</td>
+      <td>24x DVDRW SATA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">OS</td>
+      <td>Windows 11 Pro X64 DVD + License + COA</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Input Devices</td>
+      <td>Cordless keyboard &amp; Optical mouse</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">System Status</td>
+      <td>
+        Windows installed and activated<br>
+        No Bloatware<br>
+        Fully Configured and Tested
+      </td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Tech Support</td>
+      <td>Yes | Live Person | Via Toll Free <strong>800-GEN-6664</strong>
+</td>
+    </tr>
+    <tr>
+      <td style=""font-weight: bold;"">Warranty</td>
+      <td>3 Year</td>
+    </tr>
+  </tbody>
+</table>
+",CAD4LESS,Electronics > Computers > Desktop Computers,Intel® Core™ i9,"Intel® Core™ i9, NEW",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,8669.00,,true,true,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/f70d1191-0807-42f2-ad66-94192321e85f_aad3ac8c-f3dc-4f27-9fb2-8451647fd60e.jpg?v=1709204920,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+eset-nod32-antivirus-software,ESET NOD32 Antivirus Software 1-year license,<br>,CAD4LESS,Software,Accessories,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,39.00,,false,false,"",,,,false,,,,,,,,,,,,,,,,,,lb,,,active
+ms-office-home-business-perpetual-license,"MS Office Home & Business-perpetual license  (if purchased, software will be installed at no extra cost) (hourly rate)","",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,85.00,,false,false,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/19.jpg?v=1714268279,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-cad-pc-security-update-and-maintenance,Remote CAD PC Security Update and Maintenance (hourly rate),"",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,85.00,,false,false,"",https://cdn.shopify.com/s/files/1/0677/9345/3279/files/21.jpg?v=1723363552,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-cad-pc-setup,Remote CAD PC Setup (hourly rate),"",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,85.00,,false,false,"",https://cdn.shopify.com/s/files/1/0677/9345/3279/files/9.jpg?v=1714268193,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-firewall-router-or-antivirus-software-setup,"Remote Firewall, Router or Antivirus Setup (hourly rate)","",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,85.00,,false,false,"",https://cdn.shopify.com/s/files/1/0677/9345/3279/files/8.jpg?v=1714268037,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-it-consultation,Remote Endpoint Integration (hourly rate),"",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,"",0.0,,0,deny,manual,85.00,,false,false,"",https://cdn.shopify.com/s/files/1/0677/9345/3279/files/18.jpg?v=1714267988,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-network-setup,Remote Network Setup (hourly rate),"",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,85.00,,false,false,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/17_5a0d1a84-936c-4171-b4f1-7cae5eb68278.jpg?v=1714268169,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-printer-plotter-setup,Remote Printer and Plotter setup (hourly rate),"",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,85.00,,false,false,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/11.jpg?v=1714268065,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active
+remote-software-application-installation-and-configuration,Remote Software/Application installation and configuration (hourly rate),"",CAD4LESS,Software,services,"",true,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,85.00,,false,false,,https://cdn.shopify.com/s/files/1/0677/9345/3279/files/14.jpg?v=1714268112,1,"",false,,,,,,,,,,,,,,,,,,lb,,,active

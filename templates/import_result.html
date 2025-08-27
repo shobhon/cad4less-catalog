@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Import Result</h1>
+<ul>
+  <li>New categories: {{ created_categories }}</li>
+  <li>New parts: {{ created_parts }}</li>
+  <li>Updated parts: {{ updated_parts }}</li>
+  <li>Errors: {{ error_count }}</li>
+</ul>
+{% if errors %}
+<h3>First {{ errors|length }} error(s)</h3>
+<ol>{% for e in errors %}<li><code>{{ e }}</code></li>{% endfor %}</ol>
+{% endif %}
+<p><a class="btn" href="{{ url_for('import_catalog_route') }}">Import another</a>
+   <a class="btn primary" href="{{ url_for('list_builds') }}">Back to Builds</a></p>
+{% endblock %}

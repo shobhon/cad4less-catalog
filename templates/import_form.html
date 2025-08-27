@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Import Catalog</h1>
+<form method="post" action="{{ url_for('import_catalog_post') }}" enctype="multipart/form-data">
+  <label>CSV file<br><input type="file" name="file" accept=".csv" required></label>
+  <p style="margin-top:16px;">
+    <button class="btn primary" type="submit">Import</button>
+    <a class="btn" href="{{ url_for('list_builds') }}">Back</a>
+  </p>
+</form>
+{% endblock %}
