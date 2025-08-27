@@ -46,27 +46,13 @@ def create_app():
     def health():
         return {"ok": True, "time": datetime.utcnow().isoformat()}
 
-    @app.get("/")
+    @app.route("/")
     def home():
-        return redirect(url_for("list_products"))
+        return redirect(url_for("list_builds"))
 
-    # ---------- PRODUCTS (PCs = Builds imported from CSV) ----------
-    @app.get("/products")
-    def list_products():
-        builds = Build.query.order_by(Build.id.desc()).all()
-        build_rows = []
-        for b in builds:
-            parts = b.build_parts or []
-            part_count = sum((bp.quantity or 1) for bp in parts)
-            total = sum((bp.part.price or 0.0) * (bp.quantity or 1) for bp in parts)
-            build_rows.append({
-                "id": b.id,
-                "name": b.name,
-                "created_at": b.created_at,
-                "part_count": part_count,
-                "total_price": total,
-            })
-        return render_template("products_list.html", builds=build_rows)
+    @app.route("/products")
+    def products_home():
+        return redirect(url_for("list_builds"))
 
     @app.post("/builds/delete")
     def delete_builds():
