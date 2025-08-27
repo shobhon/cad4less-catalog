@@ -1,11 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>New Build</h1>
+<h2>New Build</h2>
+
 <form method="post" action="{{ url_for('create_build') }}">
-  <label>Build name<br><input type="text" name="name" required></label>
-  <p style="margin-top:16px;">
-    <button class="btn primary" type="submit">Create</button>
-    <a class="btn" href="{{ url_for('list_builds') }}">Cancel</a>
+  <p>
+    <label>Build name</label><br>
+    <input name="name" required>
   </p>
+
+  {% if categories and parts_by_cat %}
+    <h3>Pick parts (qty optional)</h3>
+    {% for c in categories %}
+      <h4>{{ c.name }}</h4>
+      {% set parts = parts_by_cat.get(c.id, []) %}
+      {% if parts %}
+        <table>
+          <thead><tr><th>Part</th><th>Price</th><th>Qty</th></tr></thead>
+          <tbody>
+          {% for p in parts %}
+            <tr>
+              <td>{{ p.name }}</td>
+              <td>{% if p.price is not none %} ${{ "%.2f"|format(p.price) }} {% endif %}</td>
+              <td><input type="number" min="0" name="part_{{ p.id }}" value="0"></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p><em>No parts in this category.</em></p>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <p><em>No categories/parts in database yet. Import CSV first.</em></p>
+  {% endif %}
+
+  <p><button class="btn primary" type="submit">Create Build</button></p>
 </form>
 {% endblock %}

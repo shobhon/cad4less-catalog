@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Import Catalog</h1>
-<form method="post" action="{{ url_for('import_catalog_post') }}" enctype="multipart/form-data">
-  <label>CSV file<br><input type="file" name="file" accept=".csv" required></label>
-  <p style="margin-top:16px;">
-    <button class="btn primary" type="submit">Import</button>
-    <a class="btn" href="{{ url_for('list_builds') }}">Back</a>
+<h2>Import CSV</h2>
+<form method="post" action="{{ url_for('import_catalog') }}" enctype="multipart/form-data">
+  <p>Choose a <code>.csv</code> file. Column names are flexible:
+     <em>Category</em>/<em>Type</em>/<em>Group</em>,
+     <em>Name</em>/<em>Product Name</em>,
+     <em>Brand</em>, <em>URL</em>, <em>Price</em>.
   </p>
+  <input type="file" name="file" accept=".csv" required>
+  <button class="btn primary" type="submit">Upload</button>
 </form>
 {% endblock %}
