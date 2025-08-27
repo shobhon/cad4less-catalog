@@ -59,7 +59,7 @@ def create_app():
         ids = request.form.getlist("selected_ids")
         if not ids:
             flash("No PCs selected for deletion.", "error")
-            return redirect(url_for("list_products"))
+            return redirect(url_for("list_builds"))
         deleted = 0
         for s in ids:
             try:
@@ -72,7 +72,7 @@ def create_app():
                 deleted += 1
         db.session.commit()
         flash(f"Deleted {deleted} PC(s).", "success")
-        return redirect(url_for("list_products"))
+        return redirect(url_for("list_builds"))
 
     # ---------- PARTS ----------
     @app.get("/parts")
@@ -162,8 +162,16 @@ def create_app():
     # ---------- BUILDS ----------
     @app.get("/builds")
     def list_builds():
-        builds = Build.query.order_by(Build.id.desc()).all()
-        return render_template("builds_list.html", builds=builds)
+        records = Build.query.order_by(Build.id.desc()).all()
+        safe_builds = []
+        for b in records:
+            safe_builds.append({
+                "id": b.id,
+                "name": getattr(b, "name", ""),
+                "price": getattr(b, "price", None),
+                "created_at": getattr(b, "created_at", None),
+            })
+        return render_template("builds_list.html", builds=safe_builds)
 
     @app.get("/builds/<int:build_id>")
     def build_specification(build_id: int):
@@ -171,21 +179,38 @@ def create_app():
         if not build:
             abort(404)
 
+        # Build a safe dict for the template (prevents Jinja UndefinedError)
+        build_safe = {
+            "id": build.id,
+            "name": getattr(build, "name", "") or "",
+            "price": getattr(build, "price", None),
+            "created_at": getattr(build, "created_at", None),
+        }
+
+        # Collect parts grouped by category
         groups = {}
         total = 0.0
-        for bp in build.build_parts:
-            cat = bp.part.category.name if bp.part and bp.part.category else "Uncategorized"
-            item = {
-                "name": bp.part.name if bp.part else "(missing part)",
-                "price": bp.part.price if bp.part else None,
-                "qty": bp.quantity or 1,
-                "subtotal": (bp.part.price or 0.0) * (bp.quantity or 1) if bp.part else 0.0,
-            }
-            total += item["subtotal"]
-            groups.setdefault(cat, []).append(item)
+        # be defensive: handle missing relationship gracefully
+        for bp in getattr(build, "build_parts", []) or []:
+            part = getattr(bp, "part", None)
+            cat = (getattr(getattr(part, "category", None), "name", None)) or "Uncategorized"
+            qty = getattr(bp, "quantity", 1) or 1
+            price = getattr(part, "price", None)
+            name = getattr(part, "name", None) or "(missing part)"
 
+            subtotal = (price or 0.0) * qty
+            total += subtotal
+
+            groups.setdefault(cat, []).append({
+                "name": name,
+                "price": price,
+                "qty": qty,
+                "subtotal": subtotal,
+            })
+
+        # Order categories (extras at the end)
         order = ["CPU","Motherboard","Memory","GPU","Storage","PSU","Case","OS",
-                 "Optical Drive","Storage Controller","RAID","I/O Ports","Peripherals","Uncategorized"]
+                "Optical Drive","Storage Controller","RAID","I/O Ports","Peripherals","Uncategorized"]
         ordered_groups, seen = [], set()
         for name in order:
             if name in groups:
@@ -194,7 +219,12 @@ def create_app():
             if name not in seen:
                 ordered_groups.append((name, items))
 
-        return render_template("build_specification.html", build=build, groups=ordered_groups, total=total)
+        return render_template(
+            "build_specification.html",
+            build=build_safe,
+            groups=ordered_groups,
+            total=total,
+        )
 
     # NEW: update Build.price
     @app.post("/builds/<int:build_id>/price")
@@ -202,8 +232,13 @@ def create_app():
         build = Build.query.get_or_404(build_id)
         price_raw = request.form.get("price", "")
         price = _parse_price(price_raw)
-        build.price = price
-        db.session.commit()
+        if hasattr(Build, "price"):
+            build.price = price
+            db.session.commit()
+        else:
+            table = getattr(Build, "__tablename__", Build.__table__.name)
+            db.session.execute(text(f'UPDATE "{table}" SET price=:price WHERE id=:id'), {"price": price, "id": build.id})
+            db.session.commit()
         flash("Build price updated.", "success")
         return redirect(url_for("list_builds"))
 
@@ -369,7 +404,7 @@ def create_app():
                 f"{result.get('parts_updated',0)} updated.",
                 "success"
             )
-        return redirect(url_for("list_products"))
+        return redirect(url_for("list_builds"))
 
     app.add_url_rule("/import", endpoint="import_catalog", view_func=import_catalog_route, methods=["GET", "POST"])
     app.add_url_rule("/builds/new", endpoint="new_build", view_func=new_build_form)
@@ -393,24 +428,26 @@ def _ensure_build_price_column():
         # If anything fails (e.g., permissions), we just proceed without hard failing.
         db.session.rollback()
 
-    def _ensure_part_brand_column():
-        """Ensure Part.brand exists (and price already exists in your model)."""
-        try:
-            inspector = inspect(db.engine)
-            table_name = getattr(Part, "__tablename__", Part.__table__.name)
-            cols = [c["name"].lower() for c in inspector.get_columns(table_name)]
-            changed = False
-            if "brand" not in cols:
-                db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN brand TEXT'))
-                changed = True
-            # If your Part model might lack price in DB, uncomment the next 3 lines:
-            # if "price" not in cols:
-            #     db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN price FLOAT'))
-            #     changed = True
-            if changed:
-                db.session.commit()
-        except Exception:
-            db.session.rollback()
+
+# Move _ensure_part_brand_column to top-level
+def _ensure_part_brand_column():
+    """Ensure Part.brand exists (and price already exists in your model)."""
+    try:
+        inspector = inspect(db.engine)
+        table_name = getattr(Part, "__tablename__", Part.__table__.name)
+        cols = [c["name"].lower() for c in inspector.get_columns(table_name)]
+        changed = False
+        if "brand" not in cols:
+            db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN brand TEXT'))
+            changed = True
+        # If your Part model might lack price in DB, uncomment the next 3 lines:
+        # if "price" not in cols:
+        #     db.session.execute(text(f'ALTER TABLE "{table_name}" ADD COLUMN price FLOAT'))
+        #     changed = True
+        if changed:
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 def _pick(row: dict, *candidates, default=None):
     lowered = {k.lower(): v for k, v in row.items()}
