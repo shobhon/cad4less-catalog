@@ -1,11 +1,16 @@
 
+import os
+
 from flask import Flask
 from .extensions import db
 from .models import *
 
+
 def create_app():
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/catalog.db'
+    app = Flask(__name__, instance_relative_config=True)
+    os.makedirs(app.instance_path, exist_ok=True)
+    db_path = os.path.join(app.instance_path, 'catalog.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'dev'
 
