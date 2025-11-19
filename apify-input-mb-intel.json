@@ -1,0 +1,13 @@
+{
+  "category": "motherboard",
+  "maxProducts": 50,
+  "maxReviews": 0,
+  "countryCode": "us",
+  "searchPhrases": [
+    "intel lga1700",
+    "z790",
+    "b760",
+    "z690",
+    "b660"
+  ]
+}

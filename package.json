@@ -1,0 +1,26 @@
+{
+  "name": "cad4less-catalog",
+  "version": "1.0.0",
+  "description": "This repository contains the initial scaffold for the CAD4Less custom PC configuration and catalog application. The goal of this project is to enable CAD4Less administrators to configure custom PC builds from real‑time priced components, validate compatibility, calculate profit margins, and publish the resulting build to Shopify for sale on the `cad4less.com` website.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shobhon/cad4less-catalog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shobhon/cad4less-catalog/issues"
+  },
+  "homepage": "https://github.com/shobhon/cad4less-catalog#readme",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.934.0",
+    "@aws-sdk/lib-dynamodb": "^3.934.0",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.13.2"
+  }
+}

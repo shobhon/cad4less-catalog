@@ -1,0 +1,152 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CAD4Less backend API
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+
+Resources:
+
+  #####################################################
+  # API Gateway
+  #####################################################
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v1
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+
+  #####################################################
+  # Fetch Live Parts
+  #####################################################
+
+  FetchPartsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/fetchParts/
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          PARTS_TABLE_NAME: Cad4LessPartsLive
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: Cad4LessPartsLive
+      Events:
+        FetchParts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts
+            Method: GET
+
+  #####################################################
+  # Import Parts from Apify
+  #####################################################
+
+  ImportPartsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/importParts/
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          PARTS_TABLE_NAME: Cad4LessPartsLive
+          APIFY_TOKEN: APIFY_TOKEN_PLACEHOLDER
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Cad4LessPartsLive
+      Events:
+        ImportParts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/import
+            Method: GET
+
+  #####################################################
+  # External Fetcher (Node 22)
+  #####################################################
+
+  FetchPartsExternalFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/fetchPartsExternal/
+      Runtime: nodejs22.x
+      Environment:
+        Variables:
+          PARTS_TABLE_NAME: Cad4LessPartsLive
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: Cad4LessPartsLive
+      Events:
+        FetchExternalParts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/external
+            Method: GET
+
+  #####################################################
+  # Approve Pending Parts
+  #####################################################
+
+  ApprovePartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/approvePart/
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          PARTS_TABLE_NAME: Cad4LessPartsLive
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Cad4LessPartsLive
+      Events:
+        ApprovePart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/approve
+            Method: POST
+
+  #####################################################
+  # List Pending Parts
+  #####################################################
+
+  ListPendingPartsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/listPendingParts/
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          PARTS_TABLE_NAME: Cad4LessPartsLive
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: Cad4LessPartsLive
+      Events:
+        ListPendingParts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/pending
+            Method: GET
+
+Outputs:
+  ApiUrl:
+    Description: Base URL for CAD4Less API
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/v1/"

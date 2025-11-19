@@ -1,0 +1,62 @@
+{
+    "Items": [
+        {
+            "id": {
+                "S": "LYM48d"
+            }
+        },
+        {
+            "id": {
+                "S": "hjt9TW"
+            }
+        },
+        {
+            "id": {
+                "S": "T2H7YJ"
+            }
+        },
+        {
+            "id": {
+                "S": "zxRzK8"
+            }
+        },
+        {
+            "id": {
+                "S": "Yj7scf"
+            }
+        },
+        {
+            "id": {
+                "S": "Vqgrxr"
+            }
+        },
+        {
+            "id": {
+                "S": "8ncG3C"
+            }
+        },
+        {
+            "id": {
+                "S": "s3cG3C"
+            }
+        },
+        {
+            "id": {
+                "S": "CsvD4D"
+            }
+        },
+        {
+            "id": {
+                "S": "hhGhP6"
+            }
+        },
+        {
+            "id": {
+                "S": "ZMxxFT"
+            }
+        }
+    ],
+    "Count": 11,
+    "ScannedCount": 261,
+    "ConsumedCapacity": null
+}

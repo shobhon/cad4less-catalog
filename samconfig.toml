@@ -1,0 +1,11 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "cad4less-catalog-stack"
+resolve_s3 = true
+s3_prefix = "cad4less-catalog-stack"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
+[default.global.parameters]
+region = "us-west-1"
