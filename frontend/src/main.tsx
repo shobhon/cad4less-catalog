@@ -224,6 +224,19 @@ function getSocket(p: Part): string {
     return deepSocket;
   }
 
+  // As a last resort, try to parse the socket from the product name itself
+  const nameRaw =
+    (p.name as string | undefined) ||
+    (anyPart.title as string | undefined) ||
+    (anyPart.productName as string | undefined);
+
+  if (nameRaw && nameRaw.trim()) {
+    const m = nameRaw.match(/(LGA ?\d{3,5}|AM[2-5]|TR4|sTRX4)/i);
+    if (m) {
+      // Normalise things like "LGA 1700" -> "LGA1700"
+      return m[0].replace(/\s+/g, "").toUpperCase();
+    }
+  }
   return "";
 }
 
@@ -307,6 +320,43 @@ function isInStock(p: Part): boolean {
   return true;
 }
 
+function inferStoreFromBuyLink(anyPart: any): string | null {
+  const vendorLists: any[] = [];
+  if (Array.isArray(anyPart.vendorList)) vendorLists.push(...anyPart.vendorList);
+  if (Array.isArray(anyPart.vendors)) vendorLists.push(...anyPart.vendors);
+  if (Array.isArray(anyPart.offers)) vendorLists.push(...anyPart.offers);
+
+  for (const v of vendorLists) {
+    if (!v || typeof v !== "object") continue;
+    const vv: any = v;
+    const raw =
+      (vv.buyLink as string | undefined) ||
+      (vv.url as string | undefined) ||
+      (vv.link as string | undefined);
+    if (!raw || typeof raw !== "string") continue;
+
+    try {
+      const u = new URL(raw);
+      let host = u.hostname.toLowerCase();
+      if (host.startsWith("www.")) host = host.slice(4);
+
+      if (host.includes("amazon.")) return "amazon";
+      if (host.includes("newegg.")) return "newegg";
+      if (host.includes("pcpartpicker.")) return "pcpartpicker";
+      if (host.includes("bestbuy.")) return "bestbuy";
+      if (host.includes("bhphotovideo.")) return "bhphotovideo";
+      if (host.includes("walmart.")) return "walmart";
+
+      const base = host.split(".")[0];
+      if (base) return base;
+    } catch {
+      // ignore malformed URLs
+    }
+  }
+
+  return null;
+}
+
 function getStoreLabel(p: Part): string {
   const anyPart = p as any;
 
@@ -353,6 +403,13 @@ function getStoreLabel(p: Part): string {
     if (candidate && !isPlaceholder(candidate)) {
       return candidate.trim();
     }
+  }
+
+  // If the usual fields are placeholders like "unknown" but we have a buyLink,
+  // infer the store from the URL host (e.g. pcpartpicker.com, amazon.com).
+  const inferredFromUrl = inferStoreFromBuyLink(anyPart);
+  if (inferredFromUrl && !isPlaceholder(inferredFromUrl)) {
+    return inferredFromUrl;
   }
 
   // Fallback: scan for any string field that looks like a store / vendor name
@@ -460,14 +517,23 @@ function applyFiltersAndSorting(
   items: Part[],
   searchText: string,
   storeFilter: string,
-  sortKey: SortKey
+  sortKey: SortKey,
+  options?: { requirePrice?: boolean }
 ) {
+  const requirePrice = options?.requirePrice ?? false;
   const normalizedSearch = searchText.trim().toLowerCase();
 
   const filtered = items.filter((p) => {
     // Only keep in-stock / available items
     if (!isInStock(p)) {
       return false;
+    }
+
+    if (requirePrice) {
+      const price = getBestPrice(p);
+      if (price == null || !Number.isFinite(price) || price <= 0) {
+        return false;
+      }
     }
 
     // Store / vendor filter
@@ -634,7 +700,8 @@ function CatalogDashboard() {
     cpusLive,
     cpuSearch,
     cpuStoreFilter,
-    cpuSortKey
+    cpuSortKey,
+    { requirePrice: true }
   );
   const cpuTotal = cpusLive.length;
   const cpuMatching = cpuProcessed.sorted.length;
@@ -660,7 +727,8 @@ function CatalogDashboard() {
     motherboardsLive,
     mbSearch,
     mbStoreFilter,
-    mbSortKey
+    mbSortKey,
+    { requirePrice: true }
   );
   const mbTotal = motherboardsLive.length;
   const mbMatching = mbProcessed.sorted.length;
@@ -670,14 +738,23 @@ function CatalogDashboard() {
   const mbPageItems = mbProcessed.sorted.slice(mbStart, mbStart + PAGE_SIZE);
 
   // ---- Cooler derived lists ----
-  const coolerStores = ["all", ...getStoreOptions(coolers)];
+  const coolersLive = React.useMemo(
+    () =>
+      coolers.filter((p) => {
+        const vendor = ((p as any).vendor ?? "").toString().toLowerCase();
+        return vendor === "pcpartpicker";
+      }),
+    [coolers]
+  );
+  const coolerStores = ["all", ...getStoreOptions(coolersLive)];
   const coolerProcessed = applyFiltersAndSorting(
-    coolers,
+    coolersLive,
     coolerSearch,
     coolerStoreFilter,
-    coolerSortKey
+    coolerSortKey,
+    { requirePrice: true }
   );
-  const coolerTotal = coolers.length;
+  const coolerTotal = coolersLive.length;
   const coolerMatching = coolerProcessed.sorted.length;
   const coolerPageCount = Math.max(1, Math.ceil(coolerMatching / PAGE_SIZE));
   const coolerPageClamped = Math.min(coolerPage, coolerPageCount);
@@ -989,6 +1066,46 @@ function CatalogDashboard() {
                     const socket = getSocket(p);
                     const { label: storeLabel, url: storeUrl } = getPrimaryOffer(p);
 
+                    const normalizedStore = (storeLabel || "").toString().toLowerCase().trim();
+                    const isPcPartPickerStore =
+                      normalizedStore === "pcpartpicker" ||
+                      normalizedStore === "pc part picker";
+
+                    // Decide what to render in the Store cell
+                    const storeCell = storeUrl ? (
+                      <a
+                        href={storeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="cell-link"
+                      >
+                        {isPcPartPickerStore ? "PCPartPicker (view offers)" : storeLabel}
+                      </a>
+                    ) : (
+                      storeLabel || "—"
+                    );
+
+                    // Decide what to render in the Price cell
+                    let priceCell: React.ReactNode;
+                    if (bestPrice != null) {
+                      priceCell = formatMoney(bestPrice);
+                    } else if (isPcPartPickerStore && storeUrl) {
+                      // We don't have a numeric price in our dataset, but PCPartPicker
+                      // has the live prices and merchant links on their page.
+                      priceCell = (
+                        <a
+                          href={storeUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="cell-link"
+                        >
+                          View price on PCPartPicker
+                        </a>
+                      );
+                    } else {
+                      priceCell = "—";
+                    }
+
                     return (
                       <tr key={p.id ?? p.name}>
                         <td className="cell-main">
@@ -1005,23 +1122,8 @@ function CatalogDashboard() {
                           )}
                         </td>
                         <td>{socket || "—"}</td>
-                        <td>
-                          {storeUrl ? (
-                            <a
-                              href={storeUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="cell-link"
-                            >
-                              {storeLabel}
-                            </a>
-                          ) : (
-                            storeLabel || "—"
-                          )}
-                        </td>
-                        <td>
-                          {bestPrice != null ? formatMoney(bestPrice) : "—"}
-                        </td>
+                        <td>{storeCell}</td>
+                        <td>{priceCell}</td>
                       </tr>
                     );
                   })}

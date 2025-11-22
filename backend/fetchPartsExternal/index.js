@@ -1,142 +1,303 @@
-// Lambda to fetch parts from PCPartPicker via Apify and store them in the Parts table.
-// NOTE: This uses node-fetch. Ensure you add it to your backend dependencies:
-//   npm install node-fetch@2
-//
-// Env vars required:
-//   APIFY_TOKEN         - your Apify API token
-//   APIFY_ACTOR_ID      - optional, defaults to "matyascimbulka/pcpartpicker-scraper"
-//   PARTS_TABLE_NAME    - DynamoDB table for parts
+const AWS = require('aws-sdk');
 
-const fetch = require("node-fetch");
-const ddb = require("../common/dynamoClient");
-const { json } = require("../common/response");
-
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const PARTS_TABLE_NAME = process.env.PARTS_TABLE_NAME;
-const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const APIFY_ACTOR_ID =
-  process.env.APIFY_ACTOR_ID || "matyascimbulka/pcpartpicker-scraper";
+
+function jsonResponse(statusCode, body) {
+  return {
+    statusCode,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+    },
+    body: JSON.stringify(body),
+  };
+}
 
 exports.handler = async (event) => {
   try {
-    const qs = event.queryStringParameters || {};
-    const category = qs.category;
-    const searchPhrase = qs.searchPhrase || "";
+    const httpMethod = event && event.httpMethod ? event.httpMethod : 'GET';
+    const path = event && event.path ? event.path : '';
+    const resource = event && event.resource ? event.resource : '';
 
-    if (!APIFY_TOKEN) {
-      return json(500, { message: "APIFY_TOKEN env var is not set" });
+    // Handle CORS preflight if needed
+    if (httpMethod === 'OPTIONS') {
+      return jsonResponse(200, { message: 'OK' });
     }
 
-    if (!category) {
-      return json(400, { message: "category query parameter is required" });
-    }
+    // CSV import via POST /parts/import-csv
+    if (httpMethod === 'POST' && (path.endsWith('/parts/import-csv') || resource === '/parts/import-csv')) {
+      const rawBody = event.body || '';
+      const decodedBody = event.isBase64Encoded
+        ? Buffer.from(rawBody, 'base64').toString('utf8')
+        : rawBody;
 
-    // 1. Start Apify actor run
-    const runInput = {
-      searchPhrases: searchPhrase ? [searchPhrase] : [],
-      category: category,
-      maxProducts: 20,
-    };
-
-    const runUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(
-      APIFY_ACTOR_ID
-    )}/runs?token=${APIFY_TOKEN}`;
-
-    const runRes = await fetch(runUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(runInput),
-    });
-
-    if (!runRes.ok) {
-      const txt = await runRes.text();
-      throw new Error(`Apify actor run failed: ${runRes.status} ${txt}`);
-    }
-
-    const runJson = await runRes.json();
-    const runData = runJson.data || runJson; // handle both wrapped and direct forms
-    const datasetId = runData.defaultDatasetId;
-
-    if (!datasetId) {
-      throw new Error("No defaultDatasetId returned from Apify run");
-    }
-
-    // 2. Read dataset items
-    const itemsUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}&clean=true&format=json`;
-    const itemsRes = await fetch(itemsUrl);
-
-    if (!itemsRes.ok) {
-      const txt = await itemsRes.text();
-      throw new Error(`Failed to fetch dataset items: ${itemsRes.status} ${txt}`);
-    }
-
-    const items = await itemsRes.json();
-    if (!Array.isArray(items)) {
-      throw new Error("Dataset items response is not an array");
-    }
-
-    // 3. Map to internal schema & batch write
-    const writeRequests = items.map((item) => {
-      const partId = item.id || item.sku || item.slug || item.name;
-      const name = item.name || "Unknown part";
-
-      // Map vendor prices
-      let vendorList = [];
-      if (item.prices && Array.isArray(item.prices.prices)) {
-        vendorList = item.prices.prices.map((p) => ({
-          vendor: p.merchant || p.store || "unknown",
-          price: typeof p.price === "number" ? p.price : null,
-          stockStatus: p.availability || p.stock || "unknown",
-          url: p.buyLink || p.url || null,
-        }));
+      if (!decodedBody) {
+        return jsonResponse(400, { message: 'Missing request body' });
       }
 
-      const specs = item.specifications || item.specs || {};
+      let payload;
+      try {
+        payload = JSON.parse(decodedBody);
+      } catch (err) {
+        return jsonResponse(400, {
+          message: 'Request body must be JSON with shape { category, csv }',
+          error: err.message,
+        });
+      }
 
-      return {
-        PutRequest: {
-          Item: {
-            category,
-            partId,
-            name,
-            specs,
-            vendorList,
-            approved: false, // require manual approval in admin
-            source: "pcpartpicker-apify",
-            createdAt: Date.now(),
-          },
-        },
+      const { category, csv } = payload || {};
+
+      if (!category || typeof category !== 'string') {
+        return jsonResponse(400, { message: 'Field "category" is required and must be a string.' });
+      }
+
+      if (!csv || typeof csv !== 'string') {
+        return jsonResponse(400, { message: 'Field "csv" is required and must be a string containing CSV data.' });
+      }
+
+      const rows = parseCsv(csv);
+      if (!rows.length) {
+        return jsonResponse(400, { message: 'CSV appears to be empty or has only a header row.' });
+      }
+
+      if (rows.length > 200) {
+        return jsonResponse(400, {
+          message: 'CSV has too many rows for a single import. Please limit to 200 rows or fewer.',
+          rowCount: rows.length,
+        });
+      }
+
+      const results = {
+        attempted: rows.length,
+        succeeded: 0,
+        failed: 0,
+        errors: [],
       };
-    });
 
-    if (!writeRequests.length) {
-      return json(200, {
-        message: "Apify run succeeded but returned no items",
-        items: [],
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        try {
+          const record = mapRowToPartRecord(row, category);
+          await upsertPart(record);
+          results.succeeded += 1;
+        } catch (err) {
+          results.failed += 1;
+          results.errors.push({ index: i, message: err.message });
+        }
+      }
+
+      return jsonResponse(200, {
+        message: 'CSV import completed',
+        ...results,
       });
     }
 
-    // DynamoDB batchWrite in chunks of 25
-    const chunks = [];
-    for (let i = 0; i < writeRequests.length; i += 25) {
-      chunks.push(writeRequests.slice(i, i + 25));
+    // Legacy GET /parts/import – informational only
+    if (httpMethod === 'GET') {
+      return jsonResponse(200, {
+        message: 'CSV import endpoint is POST /parts/import-csv. This GET /parts/import is kept for backwards compatibility only.',
+      });
     }
 
-    for (const chunk of chunks) {
-      await ddb
-        .batchWrite({
-          RequestItems: {
-            [PARTS_TABLE_NAME]: chunk,
-          },
-        })
-        .promise();
-    }
-
-    return json(200, {
-      message: `Fetched ${writeRequests.length} parts from PCPartPicker via Apify for category ${category}`,
-      count: writeRequests.length,
-    });
+    return jsonResponse(405, { message: 'Method not allowed' });
   } catch (err) {
-    console.error("Error in fetchPartsExternal:", err);
-    return json(500, { message: "Internal server error", error: err.message });
+    console.error('Error in ImportPartsFunction:', err);
+    return jsonResponse(500, {
+      message: 'Internal server error',
+      error: err.message,
+    });
   }
 };
+
+// --- CSV helpers ---
+
+// Very small CSV parser for UTF-8 text, comma-separated, with a single header row.
+// It supports basic quoted fields but is not meant for extremely complex CSV.
+function parseCsv(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (lines.length === 0) return [];
+
+  const headers = splitCsvLine(lines[0]).map((h) => h.trim());
+  const rows = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+
+    const values = splitCsvLine(line);
+    const row = {};
+    headers.forEach((h, idx) => {
+      row[h] = values[idx] !== undefined ? values[idx] : '';
+    });
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function splitCsvLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+
+  result.push(current);
+  return result;
+}
+
+// --- Mapping and DynamoDB helpers ---
+
+function mapRowToPartRecord(row, category) {
+  const name = row.name || row.Name || row.title || row.Title || row.productName || row.ProductName;
+  if (!name) {
+    throw new Error('Row is missing a recognizable name field (e.g., name, Name, title, productName).');
+  }
+
+  const rawPrice =
+    row.price ||
+    row.Price ||
+    row.FinalPrice ||
+    row.basePrice ||
+    row.BasePrice ||
+    row.cost ||
+    row.Cost;
+
+  const numericPrice = rawPrice ? parseFloat(String(rawPrice).replace(/[^0-9.]/g, '')) : undefined;
+
+  const currency =
+    row.currency ||
+    row.Currency ||
+    row.priceCurrency ||
+    row.PriceCurrency ||
+    (rawPrice && /\$/.test(rawPrice) ? '$' : undefined) || '$';
+
+  const availability =
+    row.availability ||
+    row.Availability ||
+    row.stockStatus ||
+    row.StockStatus ||
+    row.Instock ||
+    row.inStock ||
+    'unknown';
+
+  const vendor = row.vendor || row.Vendor || row.seller || row.Seller || row.source || row.Source || 'unknown';
+
+  const image =
+    row.image ||
+    row.Image ||
+    row.imageUrl ||
+    row.imageURL ||
+    row.image_url ||
+    row.thumbnail ||
+    row.Thumbnail ||
+    null;
+
+  const buyLink =
+    row.url ||
+    row.URL ||
+    row.link ||
+    row.Link ||
+    row.productUrl ||
+    row.ProductUrl ||
+    row.productURL ||
+    row.ProductURL ||
+    null;
+
+  const id =
+    row.id ||
+    row.Id ||
+    row.ID ||
+    row.slug ||
+    row.Slug ||
+    (buyLink ? slugify(buyLink) : slugify(name));
+
+  const vendorEntry = {
+    vendor,
+    price: numericPrice !== undefined && !Number.isNaN(numericPrice) ? numericPrice : null,
+    currency,
+    availability,
+    image,
+    buyLink,
+  };
+
+  return {
+    id,
+    category,
+    name,
+    price: vendorEntry.price,
+    vendor,
+    availability,
+    image,
+    vendorList: [vendorEntry],
+  };
+}
+
+function slugify(value) {
+  return String(value)
+    .toLowerCase()
+    .replace(/https?:\/\//g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+}
+
+async function upsertPart(record) {
+  if (!PARTS_TABLE_NAME) {
+    throw new Error('PARTS_TABLE_NAME env var is not set');
+  }
+
+  const now = new Date().toISOString();
+
+  const params = {
+    TableName: PARTS_TABLE_NAME,
+    Key: { id: record.id },
+    UpdateExpression:
+      'SET #category = :category, #name = :name, #price = :price, #vendor = :vendor, #availability = :availability, #image = :image, #vendorList = :vendorList, #updatedAt = :updatedAt',
+    ExpressionAttributeNames: {
+      '#category': 'category',
+      '#name': 'name',
+      '#price': 'price',
+      '#vendor': 'vendor',
+      '#availability': 'availability',
+      '#image': 'image',
+      '#vendorList': 'vendorList',
+      '#updatedAt': 'updatedAt',
+    },
+    ExpressionAttributeValues: {
+      ':category': record.category,
+      ':name': record.name,
+      ':price': record.price !== undefined && !Number.isNaN(record.price) ? record.price : null,
+      ':vendor': record.vendor,
+      ':availability': record.availability,
+      ':image': record.image || 'https://example.com/images/placeholder.png',
+      ':vendorList': record.vendorList,
+      ':updatedAt': now,
+    },
+  };
+
+  await dynamoDb.update(params).promise();
+}

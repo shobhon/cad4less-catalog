@@ -73,6 +73,12 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /parts/import
             Method: GET
+        ImportPartsCsv:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/import-csv
+            Method: POST
 
   #####################################################
   # External Fetcher (Node 22)

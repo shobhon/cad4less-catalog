@@ -21,6 +21,12 @@
     "@aws-sdk/client-dynamodb": "^3.934.0",
     "@aws-sdk/lib-dynamodb": "^3.934.0",
     "aws-sdk": "^2.1692.0",
-    "axios": "^1.13.2"
+    "axios": "^1.13.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3"
   }
 }

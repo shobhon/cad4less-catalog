@@ -1,13 +1,24 @@
 {
   "category": "motherboard",
-  "maxProducts": 50,
+  "maxProducts": 2000,
   "maxReviews": 0,
   "countryCode": "us",
   "searchPhrases": [
-    "intel lga1700",
-    "z790",
-    "b760",
-    "z690",
-    "b660"
+    "LGA1200",
+    "LGA1700",
+    "LGA2011-3",
+    "LGA2011",
+    "LGA2066",
+    "LGA1150",
+    "LGA1151",
+    "LGA1155",
+    "LGA1156",
+    "LGA1200",
+    "LGA1851",
+    "Z790 motherboard",
+    "Z690 motherboard",
+    "B760 motherboard",
+    "B660 motherboard",
+    "H610 motherboard"
   ]
 }
