@@ -1,7 +1,12 @@
 const AWS = require('aws-sdk');
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-const PARTS_TABLE_NAME = process.env.PARTS_TABLE_NAME;
+const PARTS_TABLE_NAME =
+  process.env.PARTS_TABLE_NAME ||
+  process.env.PARTS_TABLE ||
+  process.env.PARTS_TABLE_NAME_LIVE ||
+  process.env.PARTS_TABLE_NAME_DEV ||
+  process.env.PARTS_TABLE;
 
 function jsonResponse(statusCode, body) {
   return {
@@ -27,10 +32,15 @@ exports.handler = async (event) => {
       return jsonResponse(200, { message: 'OK' });
     }
 
-    // Toggle "approved" (use in builds) flag via POST /admin/parts/approved
+    // Toggle "approved" (use in builds) flag via POST /admin/parts/approved or /parts/approve
     if (
       httpMethod === 'POST' &&
-      (path.endsWith('/admin/parts/approved') || resource === '/admin/parts/approved')
+      (
+        path.endsWith('/admin/parts/approved') ||
+        resource === '/admin/parts/approved' ||
+        path.endsWith('/parts/approve') ||
+        resource === '/parts/approve'
+      )
     ) {
       const rawBody = event.body || '';
       const decodedBody = event.isBase64Encoded
@@ -175,7 +185,7 @@ exports.handler = async (event) => {
 
     return jsonResponse(405, { message: 'Method not allowed' });
   } catch (err) {
-    console.error('Error in ImportPartsFunction:', err);
+    console.error('Error in FetchPartsExternalFunction:', err);
     return jsonResponse(500, {
       message: 'Internal server error',
       error: err.message,
