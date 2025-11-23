@@ -242,6 +242,40 @@ function mapRowToPartRecord(row, category) {
     row.inStock ||
     'unknown';
 
+  const inStock = isInStock(availability);
+
+  const approvedRaw = row.approved ?? row.Approved ?? row['approved?'] ?? row['Approved?'];
+
+  let approved;
+  if (approvedRaw !== undefined && approvedRaw !== null && String(approvedRaw).trim() !== '') {
+    const v = String(approvedRaw).toLowerCase();
+    approved =
+      approvedRaw === true ||
+      v === 'true' ||
+      v === 'yes' ||
+      v === '1';
+  } else {
+    approved = undefined; // do not override existing DynamoDB value
+  }
+
+  const useInBuildsRaw =
+    row.useInBuilds ??
+    row.UseInBuilds ??
+    row['use_in_builds'] ??
+    row['Use_in_builds'];
+
+  let useInBuilds;
+  if (useInBuildsRaw !== undefined && useInBuildsRaw !== null && String(useInBuildsRaw).trim() !== '') {
+    const v2 = String(useInBuildsRaw).toLowerCase();
+    useInBuilds =
+      useInBuildsRaw === true ||
+      v2 === 'true' ||
+      v2 === 'yes' ||
+      v2 === '1';
+  } else {
+    useInBuilds = undefined;
+  }
+
   const vendor =
     row.vendor ||
     row.Vendor ||
@@ -333,9 +367,12 @@ function mapRowToPartRecord(row, category) {
     price: vendorEntry.price,
     vendor,
     availability,
+    inStock,
     image,
     specs,
     vendorList: [vendorEntry],
+    ...(approved !== undefined ? { approved } : {}),
+    ...(useInBuilds !== undefined ? { useInBuilds } : {}),
   };
 }
 
@@ -353,46 +390,81 @@ async function upsertPart(record) {
     throw new Error('PARTS_TABLE_NAME env var is not set');
   }
 
+  const hasApproved = Object.prototype.hasOwnProperty.call(record, 'approved');
+  const hasUseInBuilds = Object.prototype.hasOwnProperty.call(record, 'useInBuilds');
+
   const now = new Date().toISOString();
+
+  const updateParts = [
+    '#category = if_not_exists(#category, :category)',
+    '#name = if_not_exists(#name, :name)',
+    '#specs = if_not_exists(#specs, :specs)',
+    '#price = :price',
+    '#vendor = :vendor',
+    '#availability = :availability',
+    '#inStock = :inStock',
+    '#image = if_not_exists(#image, :image)',
+    '#vendorList = :vendorList',
+    '#updatedAt = :updatedAt',
+  ];
+
+  if (hasApproved) {
+    updateParts.splice(7, 0, '#approved = :approved');
+  }
+  if (hasUseInBuilds) {
+    updateParts.splice(8, 0, '#useInBuilds = :useInBuilds');
+  }
+
+  const updateExpression = 'SET ' + updateParts.join(', ');
+
+  const expressionAttributeNames = {
+    '#category': 'category',
+    '#name': 'name',
+    '#specs': 'specs',
+    '#price': 'price',
+    '#vendor': 'vendor',
+    '#availability': 'availability',
+    '#inStock': 'inStock',
+    '#image': 'image',
+    '#vendorList': 'vendorList',
+    '#updatedAt': 'updatedAt',
+  };
+  if (hasApproved) {
+    expressionAttributeNames['#approved'] = 'approved';
+  }
+  if (hasUseInBuilds) {
+    expressionAttributeNames['#useInBuilds'] = 'useInBuilds';
+  }
+
+  const expressionAttributeValues = {
+    ':category': record.category,
+    ':name': record.name,
+    ':specs': record.specs || {},
+    ':price':
+      record.price !== undefined && !Number.isNaN(record.price)
+        ? record.price
+        : null,
+    ':vendor': record.vendor,
+    ':availability': record.availability,
+    ':inStock': !!record.inStock,
+    ':image': record.image || 'https://example.com/images/placeholder.png',
+    ':vendorList': record.vendorList,
+    ':updatedAt': now,
+  };
+
+  if (hasApproved) {
+    expressionAttributeValues[':approved'] = record.approved === true;
+  }
+  if (hasUseInBuilds) {
+    expressionAttributeValues[':useInBuilds'] = record.useInBuilds === true;
+  }
 
   const params = {
     TableName: PARTS_TABLE_NAME,
     Key: { id: record.id },
-    UpdateExpression:
-      'SET #category = if_not_exists(#category, :category), ' +
-      '#name = if_not_exists(#name, :name), ' +
-      '#specs = if_not_exists(#specs, :specs), ' +
-      '#price = :price, ' +
-      '#vendor = :vendor, ' +
-      '#availability = :availability, ' +
-      '#image = if_not_exists(#image, :image), ' +
-      '#vendorList = :vendorList, ' +
-      '#updatedAt = :updatedAt',
-    ExpressionAttributeNames: {
-      '#category': 'category',
-      '#name': 'name',
-      '#specs': 'specs',
-      '#price': 'price',
-      '#vendor': 'vendor',
-      '#availability': 'availability',
-      '#image': 'image',
-      '#vendorList': 'vendorList',
-      '#updatedAt': 'updatedAt',
-    },
-    ExpressionAttributeValues: {
-      ':category': record.category,
-      ':name': record.name,
-      ':specs': record.specs || {},
-      ':price':
-        record.price !== undefined && !Number.isNaN(record.price)
-          ? record.price
-          : null,
-      ':vendor': record.vendor,
-      ':availability': record.availability,
-      ':image': record.image || 'https://example.com/images/placeholder.png',
-      ':vendorList': record.vendorList,
-      ':updatedAt': now,
-    },
+    UpdateExpression: updateExpression,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
   };
 
   await dynamoDb.update(params).promise();

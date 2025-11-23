@@ -16,11 +16,12 @@ exports.handler = async (event) => {
 
     const params = {
       TableName: TABLE_NAME,
-      Key: { category, partId },
+      Key: { id: partId },
       UpdateExpression: "SET approved = :a",
       ExpressionAttributeValues: {
         ":a": approved,
       },
+      ConditionExpression: "attribute_exists(id)",
       ReturnValues: "ALL_NEW",
     };
 
