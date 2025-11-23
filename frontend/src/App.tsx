@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { fetchParts, Part, updatePartApproved } from "./api/client";
+import { fetchParts, Part, updatePartApproved, runApifyImport } from "./api/client";
 import { formatMoney, getBestPrice as baseGetBestPrice } from "./utils";
 
 type SortKey = "name-asc" | "price-asc" | "price-desc";
+
+type ApifyCategory =
+  | "cpu"
+  | "cpu-cooler"
+  | "motherboard"
+  | "memory"
+  | "storage"
+  | "video-card"
+  | "case"
+  | "power-supply"
+  | "operating-system"
+  | "monitor"
+  | "expansion-cards-networking"
+  | "peripherals"
+  | "accessories-other";
 
 const PAGE_SIZE = 10;
 
@@ -325,8 +340,10 @@ function isInStock(p: Part): boolean {
     if (availabilityRaw.includes("out-of-stock")) return false;
     if (availabilityRaw.includes("unavailable")) return false;
     if (availabilityRaw.includes("sold out")) return false;
-    if (availabilityRaw.includes("preorder") || availabilityRaw.includes("pre-order")) return false;
-    if (availabilityRaw.includes("backorder") || availabilityRaw.includes("back-order")) return false;
+    if (availabilityRaw.includes("preorder") || availabilityRaw.includes("pre-order"))
+      return false;
+    if (availabilityRaw.includes("backorder") || availabilityRaw.includes("back-order"))
+      return false;
 
     return true;
   }
@@ -816,9 +833,9 @@ function CatalogDashboard() {
         <header className="panel-header">
           <h2>Select Parts for PC Builds</h2>
           <p className="panel-subtitle">
-            Internal dashboard for CPUs, motherboards, and CPU coolers. Use the
-            &quot;Use in builds&quot; column to mark parts that should be available
-            for custom PC builds.
+            Operations dashboard for CPUs, motherboards, and CPU coolers. Use the
+            &quot;Use in builds&quot; column to choose which parts are eligible for
+            CAD4Less custom PC builds.
           </p>
         </header>
         <div className="table-meta" style={{ marginTop: "10px" }}>
@@ -860,9 +877,9 @@ function CatalogDashboard() {
         <header className="panel-header">
           <h2>1. CPU Catalog (Live Data)</h2>
           <p className="panel-subtitle">
-            View all CPUs currently available in your catalog. Tick{" "}
-            <strong>&quot;Use in builds&quot;</strong> for processors you want to
-            offer in custom PC builds.
+            Review every CPU currently in the catalog. Turn on{" "}
+            <strong>&quot;Use in builds&quot;</strong> for processors you are
+            comfortable offering in customer PC configurations.
           </p>
         </header>
 
@@ -948,8 +965,8 @@ function CatalogDashboard() {
           <div className="table-loading">Loading CPUs…</div>
         ) : cpuMatching === 0 ? (
           <div className="table-empty">
-            No CPUs found. Try changing the filters or running the CPU import job in
-            the backend.
+            No CPUs match the current filters. Adjust the filters above or run the CPU
+            import job in the backend to refresh the list.
           </div>
         ) : (
           <>
@@ -1074,9 +1091,9 @@ function CatalogDashboard() {
         <header className="panel-header">
           <h2>2. Motherboard Catalog (Live Data)</h2>
           <p className="panel-subtitle">
-            View all motherboards currently available in your catalog. Tick{" "}
-            <strong>&quot;Use in builds&quot;</strong> for boards you want to use in
-            PC builds.
+            Review all motherboards currently available in your catalog. Turn on{" "}
+            <strong>&quot;Use in builds&quot;</strong> for boards you want to allow in
+            CAD4Less PC builds.
           </p>
         </header>
 
@@ -1165,8 +1182,8 @@ function CatalogDashboard() {
           <div className="table-loading">Loading motherboards…</div>
         ) : mbMatching === 0 ? (
           <div className="table-empty">
-            No motherboards found. Try changing the filters or running the motherboard
-            import job in the backend.
+            No motherboards match the current filters. Adjust the filters above or run
+            the motherboard import job in the backend to refresh the list.
           </div>
         ) : (
           <>
@@ -1323,9 +1340,9 @@ function CatalogDashboard() {
         <header className="panel-header">
           <h2>3. CPU Coolers Catalog (Live Data)</h2>
           <p className="panel-subtitle">
-            View all CPU coolers currently available in your catalog. Tick{" "}
-            <strong>&quot;Use in builds&quot;</strong> for coolers you want to use in
-            PC builds.
+            Review all CPU coolers currently available in your catalog. Turn on{" "}
+            <strong>&quot;Use in builds&quot;</strong> for coolers you want to include
+            in CAD4Less PC builds.
           </p>
         </header>
 
@@ -1411,8 +1428,8 @@ function CatalogDashboard() {
           <div className="table-loading">Loading CPU coolers…</div>
         ) : coolerMatching === 0 ? (
           <div className="table-empty">
-            No CPU coolers found. Try changing the filters or running the cooler import
-            job in the backend.
+            No CPU coolers match the current filters. Adjust the filters above or run
+            the cooler import job in the backend to refresh the list.
           </div>
         ) : (
           <>
@@ -1543,19 +1560,219 @@ function CatalogDashboard() {
 
 // --- Begin: Add Parts Tab ---
 const AddPartsTab: React.FC = () => {
+  const [category, setCategory] = useState<ApifyCategory>("cpu");
+  const [searchPhrases, setSearchPhrases] = useState<string[]>([""]);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [maxItems, setMaxItems] = useState<string>("");
+
+  const handleRunApifyImport = async () => {
+    const phrases = searchPhrases.map((p) => p.trim()).filter(Boolean);
+    if (!phrases.length) {
+      setStatus("Enter at least one search phrase to run an import.");
+      return;
+    }
+
+    setIsRunning(true);
+    setStatus(null);
+
+    // Parse and validate maxItems
+    const maxItemsNumber =
+      maxItems.trim() !== "" ? Number.parseInt(maxItems.trim(), 10) : undefined;
+
+    if (
+      maxItemsNumber !== undefined &&
+      (!Number.isFinite(maxItemsNumber) || maxItemsNumber <= 0)
+    ) {
+      setIsRunning(false);
+      setStatus('Enter a positive number in "Max products" or leave it blank.');
+      return;
+    }
+
+    try {
+      const result = await runApifyImport(category, phrases, maxItemsNumber);
+      const count =
+        Array.isArray((result as any).searchPhrases) &&
+        (result as any).searchPhrases.length > 0
+          ? (result as any).searchPhrases.length
+          : phrases.length;
+      setStatus(
+        `Apify import completed: ${result.itemCount} items found for category "${result.category}" using ${count} search phrase${
+          count === 1 ? "" : "s"
+        }.`
+      );
+    } catch (err: any) {
+      console.error("Apify import error", err);
+      setStatus(
+        `Error: ${
+          err?.message ??
+          "Unable to run the Apify import. Check the browser console or network tab for details, or contact an administrator."
+        }`
+      );
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   return (
     <section className="panel">
       <header className="panel-header">
         <h2>Add Parts</h2>
         <p className="panel-subtitle">
-          This tab will handle importing or uploading new parts into the catalog
-          (API imports, CSV uploads, etc.).
+          Pull fresh parts data into the catalog from Apify-powered scrapes. Use this
+          step to confirm the connection and see how many items are available in each
+          component category.
         </p>
       </header>
       <div className="panel-body">
-        <p>
-          In a later step, we&apos;ll connect this screen to the backend to add
-          parts from sources like PCPartPicker, Amazon, Newegg, and CSV files.
+        <div
+          className="toolbar"
+          style={{ marginBottom: 16, alignItems: "flex-start" }}
+        >
+          {/* Left: Category selection (occupies the large left area) */}
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label" htmlFor="apify-category">
+              Category
+            </label>
+            <select
+              id="apify-category"
+              className="toolbar-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ApifyCategory)}
+            >
+              <option value="cpu">CPU</option>
+              <option value="cpu-cooler">CPU Cooler</option>
+              <option value="motherboard">Motherboard</option>
+              <option value="memory">Memory</option>
+              <option value="storage">Storage</option>
+              <option value="video-card">Video Card</option>
+              <option value="case">Case</option>
+              <option value="power-supply">Power Supply</option>
+              <option value="operating-system">Operating System</option>
+              <option value="monitor">Monitor</option>
+              <option value="expansion-cards-networking">
+                Expansion Cards / Networking
+              </option>
+              <option value="peripherals">Peripherals</option>
+              <option value="accessories-other">Accessories / Other</option>
+            </select>
+            <div style={{ marginTop: 12 }}>
+              <label
+                className="toolbar-label"
+                htmlFor="apify-max-items"
+                style={{ display: "block" }}
+              >
+                Max products{" "}
+                <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional)</span>
+              </label>
+              <input
+                id="apify-max-items"
+                className="toolbar-input"
+                type="number"
+                min={1}
+                step={1}
+                placeholder="e.g. 50"
+                value={maxItems}
+                onChange={(e) => setMaxItems(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Right: Search phrases + controls */}
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label">Search phrase(s)</label>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {searchPhrases.map((phrase, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ width: 16 }}>{index + 1}</span>
+                  <input
+                    className="toolbar-input"
+                    type="text"
+                    placeholder="e.g. LGA1155"
+                    value={phrase}
+                    onChange={(e) => {
+                      const next = [...searchPhrases];
+                      next[index] = e.target.value;
+                      setSearchPhrases(next);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      const next = searchPhrases.filter((_, i) => i !== index);
+                      setSearchPhrases(next.length ? next : [""]);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSearchPhrases((prev) => [...prev, ""])}
+                >
+                  + Add
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() =>
+                    setSearchPhrases((prev) => {
+                      const cleaned = prev.map((p) => p.trim()).filter(Boolean);
+                      return cleaned.length ? cleaned : [""];
+                    })
+                  }
+                >
+                  Remove empty fields
+                </button>
+              </div>
+              <div className="panel-subtitle" style={{ fontSize: 12 }}>
+                Leave any unused rows blank—empty fields are cleaned up automatically.
+              </div>
+            </div>
+          </div>
+
+          {/* Far right: Run import button */}
+          <div className="toolbar-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleRunApifyImport}
+              disabled={
+                isRunning || !searchPhrases.some((p) => p.trim().length > 0)
+              }
+            >
+              {isRunning ? "Importing…" : "Run Apify import"}
+            </button>
+          </div>
+        </div>
+
+        {status && (
+          <div
+            className={
+              status.toLowerCase().startsWith("error:")
+                ? "alert alert-error"
+                : "alert alert-info"
+            }
+          >
+            {status}
+          </div>
+        )}
+
+        <p className="panel-subtitle" style={{ marginTop: 16 }}>
+          In a later phase, these Apify results will be normalized and written into the
+          live parts tables so they automatically appear in the &quot;Select Parts for
+          PC Builds&quot; tab.
         </p>
       </div>
     </section>
@@ -1764,9 +1981,9 @@ const NewPcBuildTab: React.FC = () => {
       <header className="panel-header">
         <h2>New PC Build</h2>
         <p className="panel-subtitle">
-          One-page configuration screen for CAD4Less PC builds. Select approved
-          components from the dropdowns; compatibility filters narrow the lists based
-          on CPU and motherboard socket, and the summary shows cost and selling price.
+          Use this one-page workspace to design CAD4Less PC builds. Start with approved
+          parts, let socket-aware filters keep components compatible, and track parts
+          cost and selling price in the summary.
         </p>
       </header>
 
@@ -1830,9 +2047,9 @@ const NewPcBuildTab: React.FC = () => {
             <header className="panel-header">
               <h3>Component selection</h3>
               <p className="panel-subtitle">
-                All dropdowns use only parts marked &quot;Use in builds&quot; in the
-                Select Parts tab. Motherboard and cooler choices are restricted to
-                sockets that match the selected CPU and motherboard.
+                All dropdowns only show parts marked &quot;Use in builds&quot; on the
+                Select Parts tab. Motherboard and cooler options are automatically
+                limited to sockets that match the selected CPU and motherboard.
               </p>
             </header>
             <div className="panel-body">
@@ -1911,8 +2128,8 @@ const NewPcBuildTab: React.FC = () => {
 
             {selectedParts.length === 0 ? (
               <div className="table-empty">
-                Start by selecting a CPU, motherboard, and cooler. As you pick parts,
-                they will appear here with a running total.
+                Start by selecting a CPU, motherboard, and cooler. As you choose parts,
+                they will appear here with a running cost total.
               </div>
             ) : (
               <div className="table-wrapper" style={{ maxHeight: 260, overflow: "auto" }}>
@@ -2031,8 +2248,8 @@ const NewPcBuildTab: React.FC = () => {
 
             {!allRequiredSelected && (
               <p className="panel-subtitle" style={{ marginTop: 8 }}>
-                To save this build, choose a CPU, motherboard, cooler, and give the
-                build a name.
+                To save this build, enter a build name and select a CPU, motherboard,
+                and cooler.
               </p>
             )}
           </div>
@@ -2049,15 +2266,15 @@ const CatalogTab: React.FC = () => {
       <header className="panel-header">
         <h2>Catalog</h2>
         <p className="panel-subtitle">
-          This tab will list saved PC builds that are ready to be exported to Shopify
-          as products for cad4less.com.
+          This view will list saved PC builds that are ready to be exported to Shopify
+          as products on cad4less.com.
         </p>
       </header>
       <div className="panel-body">
         <p>
-          In a later step, we&apos;ll show all builds created in the &quot;New PC
-          Build&quot; tab, including profile (Economy / Standard / Premium / AI),
-          cost breakdown, and Shopify export status.
+          In a later phase, this tab will show every build created in the &quot;New PC
+          Build&quot; tab, including the build profile (Economy / Standard / Premium /
+          AI), cost breakdown, and Shopify export status.
         </p>
       </div>
     </section>
@@ -2092,7 +2309,8 @@ const App: React.FC = () => {
       <header className="panel-header" style={{ marginBottom: "24px" }}>
         <h1>CAD4Less Catalog Admin</h1>
         <p className="panel-subtitle">
-          Genesis internal tool to import parts, configure CAD‑optimized PC builds, and export products to cad4less.com.
+          Internal Genesis console for importing parts, designing CAD-optimized PC
+          builds, and publishing finished systems to cad4less.com.
         </p>
       </header>
 

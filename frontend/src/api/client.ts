@@ -176,3 +176,30 @@ export async function updatePartApproved(
     console.warn("Backend updatePartApproved error:", err);
   }
 }
+
+export async function runApifyImport(
+  category: Category,
+  datasetId: string
+): Promise<{
+  status: string;
+  category: string;
+  datasetId: string;
+  itemCount: number;
+  items?: unknown[];
+}> {
+  const res = await fetch(
+    `${API_BASE}/imports/apify/${encodeURIComponent(category)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ datasetId }),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `Apify import failed (${res.status} ${res.statusText}): ${text}`
+    );
+  }
+  return res.json();
+}

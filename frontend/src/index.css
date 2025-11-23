@@ -1,1 +1,115 @@
 @import "./App.css";
+
+/* Global typography polish for all tabs */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  color: #0f172a;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Top-level page title and section headings */
+h1 {
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.3rem; /* 20.8px */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25rem;
+}
+
+/* Small section labels such as "Build details", "Component selection" */
+h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+/* Toolbar and form labels (STORE FILTER, CATEGORY, etc.) */
+.toolbar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+/* Summary / information lines (Total parts in catalog…, Processors in catalog…) */
+.panel-subtitle {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+/* Long description / helper copy under headings */
+.panel-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+/* Muted helper text (e.g., "Empty fields will be removed automatically.") */
+.helper-text,
+.text-muted {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* Button text smoothing */
+.btn {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Tab labels */
+.tabs-tab {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Data table typography */
+.data-table th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.data-table td {
+  font-size: 0.9rem;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.toolbar-input,
+.toolbar-select,
+textarea.toolbar-input {
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+/* Informational banners and messages */
+.table-meta,
+.table-empty,
+.table-loading,
+.alert,
+.compat-banner {
+  font-size: 0.9rem;
+}
+
+.table-meta span {
+  white-space: nowrap;
+}

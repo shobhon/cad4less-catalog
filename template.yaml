@@ -1,3 +1,124 @@
+/Users/shobhon/Downloads/cad4less-catalog/frontend/src/api/client.ts
+export async function runApifyImport(
+  category: string,
+  datasetId: string
+): Promise<{
+  status: string;
+  category: string;
+  datasetId: string;
+  itemCount: number;
+  items?: unknown[];
+}> {
+  const res = await fetch(
+    `${API_BASE}/imports/apify/${encodeURIComponent(category)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ datasetId }),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `Apify import failed (${res.status} ${res.statusText}): ${text}`
+    );
+  }
+  return res.json();
+}
+
+/Users/shobhon/Downloads/cad4less-catalog/frontend/src/App.tsx
+import { fetchParts, updatePartApproved, runApifyImport } from './api/client';
+
+function App() {
+  const [activeTab, setActiveTab] = useState<'browse' | 'addParts' | 'builds'>('browse');
+  const [apifyCategory, setApifyCategory] = useState<string>('cpu');
+  const [apifyDatasetId, setApifyDatasetId] = useState<string>('');
+  const [isRunningApify, setIsRunningApify] = useState<boolean>(false);
+  const [apifyStatus, setApifyStatus] = useState<string>('');
+
+  // ... other hooks and code ...
+
+  const handleRunApifyImport = async () => {
+    if (!apifyDatasetId.trim()) return;
+    setIsRunningApify(true);
+    setApifyStatus('');
+    try {
+      const result = await runApifyImport(apifyCategory, apifyDatasetId.trim());
+      setApifyStatus(
+        `Imported for category "${result.category}": ${result.itemCount} items from dataset ${result.datasetId}.`
+      );
+    } catch (err: any) {
+      console.error('Apify import error:', err);
+      setApifyStatus(
+        `Error: ${
+          err?.message || 'Failed to run Apify import. Check console logs.'
+        }`
+      );
+    } finally {
+      setIsRunningApify(false);
+    }
+  };
+
+  return (
+    <>
+      {/* other tab content */}
+
+      {activeTab === 'addParts' && (
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold">Add Parts</h2>
+          <p className="text-sm text-slate-600">
+            Use Apify dataset IDs to pull raw parts data (CPU, motherboard, CPU coolers) into the tool. This first step just verifies the connection and shows how many items are available.
+          </p>
+          <div className="flex flex-col gap-3 max-w-xl">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium" htmlFor="apifyCategory">
+                Category
+              </label>
+              <select
+                id="apifyCategory"
+                className="border rounded px-2 py-1 text-sm"
+                value={apifyCategory}
+                onChange={(e) => setApifyCategory(e.target.value)}
+              >
+                <option value="cpu">CPU</option>
+                <option value="motherboard">Motherboard</option>
+                <option value="cpu-cooler">CPU Cooler</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium" htmlFor="apifyDatasetId">
+                Apify Dataset ID
+              </label>
+              <input
+                id="apifyDatasetId"
+                className="border rounded px-2 py-1 text-sm"
+                type="text"
+                value={apifyDatasetId}
+                onChange={(e) => setApifyDatasetId(e.target.value)}
+                placeholder="e.g. AbCdEfGhIjKLMnOp"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex items-center px-3 py-1.5 text-sm font-medium border rounded disabled:opacity-60"
+                onClick={handleRunApifyImport}
+                disabled={isRunningApify || !apifyDatasetId.trim()}
+              >
+                {isRunningApify ? 'Importing…' : 'Run Apify Import'}
+              </button>
+              {apifyStatus && (
+                <span className="text-xs text-slate-700">{apifyStatus}</span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* other tab content */}
+    </>
+  );
+}
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: CAD4Less backend API
@@ -21,7 +142,7 @@ Resources:
     Properties:
       StageName: v1
       Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'*'"
         AllowOrigin: "'*'"
 
@@ -50,7 +171,7 @@ Resources:
             Method: GET
 
   #####################################################
-  # Import Parts from Apify
+  # Import Parts from Apify / CSV
   #####################################################
 
   ImportPartsFunction:
@@ -79,9 +200,15 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /parts/import-csv
             Method: POST
+        ImportPartsByCategory:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /imports/apify/{category}
+            Method: POST
 
   #####################################################
-  # External Fetcher (Node 22)
+  # External Parts Fetcher (Node 22)
   #####################################################
 
   FetchPartsExternalFunction:
@@ -105,7 +232,7 @@ Resources:
             Method: GET
 
   #####################################################
-  # Approve Pending Parts
+  # Update / Approve Parts
   #####################################################
 
   ApprovePartFunction:
@@ -125,7 +252,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGateway
-            Path: /parts/approve
+            Path: /parts/approved
             Method: POST
 
   #####################################################
