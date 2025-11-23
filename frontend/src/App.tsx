@@ -1563,24 +1563,480 @@ const AddPartsTab: React.FC = () => {
 };
 
 // --- Begin: New PC Build Tab ---
+const getPartId = (p: Part): string => {
+  const anyPart = p as any;
+  if (anyPart.id != null) return String(anyPart.id);
+  if (typeof anyPart.sku === "string" && anyPart.sku.trim()) return anyPart.sku.trim();
+  if (typeof anyPart.name === "string" && anyPart.name.trim()) return anyPart.name.trim();
+  return JSON.stringify(anyPart);
+};
+
+type PartSelectProps = {
+  label: string;
+  options: Part[];
+  value: string;
+  onChange: (id: string | null) => void;
+  placeholder?: string;
+};
+
+const PartSelect: React.FC<PartSelectProps> = ({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Select…",
+}) => (
+  <div className="toolbar-group">
+    <label className="toolbar-label">{label}</label>
+    <select
+      className="toolbar-select"
+      value={value}
+      onChange={(e) => onChange(e.target.value || null)}
+    >
+      <option value="">{placeholder}</option>
+      {options.map((p) => {
+        const optionId = getPartId(p);
+        const price = getBestPrice(p);
+        const priceText = price != null ? formatMoney(price) : "(no price)";
+        return (
+          <option key={optionId} value={optionId}>
+            {p.name ? `${p.name} — ${priceText}` : optionId}
+          </option>
+        );
+      })}
+    </select>
+  </div>
+);
+
 const NewPcBuildTab: React.FC = () => {
+  const [loadingParts, setLoadingParts] = React.useState(false);
+  const [partsError, setPartsError] = React.useState<string | null>(null);
+
+  const [cpuOptions, setCpuOptions] = React.useState<Part[]>([]);
+  const [motherboardOptions, setMotherboardOptions] = React.useState<Part[]>([]);
+  const [coolerOptions, setCoolerOptions] = React.useState<Part[]>([]);
+
+  // Build meta
+  const [buildName, setBuildName] = React.useState("");
+  const [profile, setProfile] = React.useState("standard");
+  const [notes, setNotes] = React.useState("");
+
+  // Selected component IDs (string; empty string means "none selected")
+  const [cpuId, setCpuId] = React.useState<string>("");
+  const [motherboardId, setMotherboardId] = React.useState<string>("");
+  const [coolerId, setCoolerId] = React.useState<string>("");
+
+  const [marginPercent, setMarginPercent] = React.useState<number>(20);
+
+  const reloadParts = React.useCallback(async () => {
+    try {
+      setLoadingParts(true);
+      setPartsError(null);
+      const [cpuResp, mbResp, coolerResp] = await Promise.all([
+        fetchParts("cpu" as any, "all"),
+        fetchParts("motherboard" as any, "all"),
+        fetchParts("cpu-cooler" as any, "all"),
+      ]);
+
+      const onlyApproved = (items: Part[] | undefined | null) =>
+        (items ?? []).filter((p) => !!p.approved);
+
+      setCpuOptions(onlyApproved(cpuResp.parts));
+      setMotherboardOptions(onlyApproved(mbResp.parts));
+      setCoolerOptions(onlyApproved(coolerResp.parts));
+    } catch (err: any) {
+      console.error("Failed to load parts for New PC Build", err);
+      setPartsError(err?.message ?? "Failed to load parts for New PC Build");
+    } finally {
+      setLoadingParts(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void reloadParts();
+  }, [reloadParts]);
+
+  const selectedCpu = React.useMemo(
+    () => cpuOptions.find((p) => getPartId(p) === cpuId) ?? null,
+    [cpuId, cpuOptions]
+  );
+  const selectedMotherboard = React.useMemo(
+    () => motherboardOptions.find((p) => getPartId(p) === motherboardId) ?? null,
+    [motherboardId, motherboardOptions]
+  );
+  const selectedCooler = React.useMemo(
+    () => coolerOptions.find((p) => getPartId(p) === coolerId) ?? null,
+    [coolerId, coolerOptions]
+  );
+
+  const compatibleMotherboards = React.useMemo(() => {
+    if (!selectedCpu) return motherboardOptions;
+
+    const cpuTokens = extractSocketTokens(getSocket(selectedCpu));
+    const cpuKeys = cpuTokens.map((t) => normalizeSocket(t));
+
+    if (!cpuKeys.length) return motherboardOptions;
+
+    return motherboardOptions.filter((mb) => {
+      const mbTokens = extractSocketTokens(getSocket(mb));
+      const mbKeys = mbTokens.map((t) => normalizeSocket(t));
+      return mbKeys.some((k) => cpuKeys.includes(k));
+    });
+  }, [selectedCpu, motherboardOptions]);
+
+  const compatibleCoolers = React.useMemo(() => {
+    if (!selectedCpu && !selectedMotherboard) return coolerOptions;
+
+    const keySet = new Set<string>();
+
+    if (selectedCpu) {
+      extractSocketTokens(getSocket(selectedCpu))
+        .map((t) => normalizeSocket(t))
+        .forEach((k) => keySet.add(k));
+    }
+
+    if (selectedMotherboard) {
+      extractSocketTokens(getSocket(selectedMotherboard))
+        .map((t) => normalizeSocket(t))
+        .forEach((k) => keySet.add(k));
+    }
+
+    if (!keySet.size) return coolerOptions;
+
+    return coolerOptions.filter((cooler) => {
+      const coolerKeys = extractSocketTokens(getSocket(cooler)).map((t) =>
+        normalizeSocket(t)
+      );
+      return coolerKeys.some((k) => keySet.has(k));
+    });
+  }, [selectedCpu, selectedMotherboard, coolerOptions]);
+
+  const selectedParts: Part[] = React.useMemo(() => {
+    const parts: Part[] = [];
+    if (selectedCpu) parts.push(selectedCpu);
+    if (selectedMotherboard) parts.push(selectedMotherboard);
+    if (selectedCooler) parts.push(selectedCooler);
+    return parts;
+  }, [selectedCpu, selectedMotherboard, selectedCooler]);
+
+  const partsSubtotal = React.useMemo(
+    () =>
+      selectedParts.reduce((sum, p) => {
+        const price = getBestPrice(p);
+        return sum + (price ?? 0);
+      }, 0),
+    [selectedParts]
+  );
+
+  const finalPrice = React.useMemo(
+    () => partsSubtotal * (1 + (marginPercent || 0) / 100),
+    [partsSubtotal, marginPercent]
+  );
+
+  const handleSaveDraft = () => {
+    const payload = {
+      name: buildName,
+      profile,
+      notes,
+      components: {
+        cpuId,
+        motherboardId,
+        coolerId,
+      },
+      pricing: {
+        partsSubtotal,
+        marginPercent,
+        finalPrice,
+      },
+    };
+
+    console.log("New PC build draft (frontend-only, not yet persisted):", payload);
+    alert(
+      "Draft saved in browser memory only for now.\nBackend persistence and validation will be wired in a later phase."
+    );
+  };
+
+  const allRequiredSelected =
+    !!selectedCpu && !!selectedMotherboard && !!selectedCooler && !!buildName.trim();
+
   return (
-    <section className="panel">
+    <section className="panel panel--catalog">
       <header className="panel-header">
         <h2>New PC Build</h2>
         <p className="panel-subtitle">
-          This tab will guide you through creating a new CAD4Less PC build using the
-          approved parts. In the next phases we&apos;ll add CPU → motherboard →
-          cooler selection, compatibility checks, and margin-based pricing.
+          One-page configuration screen for CAD4Less PC builds. Select approved
+          components from the dropdowns; compatibility filters narrow the lists based
+          on CPU and motherboard socket, and the summary shows cost and selling price.
         </p>
       </header>
-      <div className="panel-body">
-        <p>
-          For now, use the &quot;Select Parts for PC Builds&quot; tab to mark which
-          CPUs, motherboards, and coolers are eligible for builds. Then we&apos;ll wire
-          this screen to pick from those approved parts and calculate a suggested
-          selling price.
-        </p>
+
+      {partsError && <div className="alert alert-error">{partsError}</div>}
+
+      <div
+        className="panel-body"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+          gap: 24,
+        }}
+      >
+        {/* Left: build details + component dropdowns */}
+        <div>
+          <div className="panel panel--sub">
+            <header className="panel-header">
+              <h3>Build details</h3>
+            </header>
+            <div className="panel-body">
+              <div className="toolbar-group">
+                <label className="toolbar-label">Build name</label>
+                <input
+                  type="text"
+                  className="toolbar-input"
+                  placeholder="e.g. CAD4Less i7 LGA1700 Workstation"
+                  value={buildName}
+                  onChange={(e) => setBuildName(e.target.value)}
+                />
+              </div>
+
+              <div className="toolbar-group">
+                <label className="toolbar-label">Profile</label>
+                <select
+                  className="toolbar-select"
+                  value={profile}
+                  onChange={(e) => setProfile(e.target.value)}
+                >
+                  <option value="economy">Economy</option>
+                  <option value="standard">Standard</option>
+                  <option value="premium">Premium</option>
+                  <option value="ai">AI / GPU-heavy</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+
+              <div className="toolbar-group">
+                <label className="toolbar-label">Internal notes</label>
+                <textarea
+                  className="toolbar-input"
+                  rows={3}
+                  placeholder="Internal notes about this configuration (not shown on Shopify)…"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="panel panel--sub">
+            <header className="panel-header">
+              <h3>Component selection</h3>
+              <p className="panel-subtitle">
+                All dropdowns use only parts marked &quot;Use in builds&quot; in the
+                Select Parts tab. Motherboard and cooler choices are restricted to
+                sockets that match the selected CPU and motherboard.
+              </p>
+            </header>
+            <div className="panel-body">
+              {loadingParts && (
+                <div className="table-loading">Loading parts for New PC Build…</div>
+              )}
+
+              {!loadingParts && (
+                <>
+                  <PartSelect
+                    label="CPU"
+                    options={cpuOptions}
+                    value={cpuId}
+                    onChange={(id) => {
+                      setCpuId(id ?? "");
+                      // Reset downstream selections when CPU changes
+                      setMotherboardId("");
+                      setCoolerId("");
+                    }}
+                    placeholder="Select CPU"
+                  />
+
+                  <PartSelect
+                    label="Motherboard"
+                    options={compatibleMotherboards}
+                    value={motherboardId}
+                    onChange={(id) => {
+                      setMotherboardId(id ?? "");
+                      // Reset cooler when motherboard changes
+                      setCoolerId("");
+                    }}
+                    placeholder={
+                      selectedCpu
+                        ? "Select motherboard (socket-compatible)"
+                        : "Select motherboard"
+                    }
+                  />
+
+                  <PartSelect
+                    label="CPU cooler"
+                    options={compatibleCoolers}
+                    value={coolerId}
+                    onChange={(id) => setCoolerId(id ?? "")}
+                    placeholder={
+                      selectedCpu || selectedMotherboard
+                        ? "Select cooler (socket-compatible)"
+                        : "Select cooler"
+                    }
+                  />
+
+                  <div className="toolbar-group" style={{ marginTop: 16 }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => void reloadParts()}
+                      disabled={loadingParts}
+                    >
+                      {loadingParts ? "Refreshing parts…" : "Reload parts lists"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: summary & pricing */}
+        <aside className="panel panel--sub">
+          <header className="panel-header">
+            <h3>Build summary &amp; pricing</h3>
+          </header>
+          <div className="panel-body">
+            <div className="table-meta" style={{ marginBottom: 12 }}>
+              <span>Selected components: {selectedParts.length}</span>
+            </div>
+
+            {selectedParts.length === 0 ? (
+              <div className="table-empty">
+                Start by selecting a CPU, motherboard, and cooler. As you pick parts,
+                they will appear here with a running total.
+              </div>
+            ) : (
+              <div className="table-wrapper" style={{ maxHeight: 260, overflow: "auto" }}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Component</th>
+                      <th>Part</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedCpu && (
+                      <tr>
+                        <td>CPU</td>
+                        <td className="cell-main">
+                          <div className="cell-title">{selectedCpu.name}</div>
+                        </td>
+                        <td>
+                          {(() => {
+                            const price = getBestPrice(selectedCpu);
+                            return price != null ? formatMoney(price) : "—";
+                          })()}
+                        </td>
+                      </tr>
+                    )}
+                    {selectedMotherboard && (
+                      <tr>
+                        <td>Motherboard</td>
+                        <td className="cell-main">
+                          <div className="cell-title">{selectedMotherboard.name}</div>
+                        </td>
+                        <td>
+                          {(() => {
+                            const price = getBestPrice(selectedMotherboard);
+                            return price != null ? formatMoney(price) : "—";
+                          })()}
+                        </td>
+                      </tr>
+                    )}
+                    {selectedCooler && (
+                      <tr>
+                        <td>CPU cooler</td>
+                        <td className="cell-main">
+                          <div className="cell-title">{selectedCooler.name}</div>
+                        </td>
+                        <td>
+                          {(() => {
+                            const price = getBestPrice(selectedCooler);
+                            return price != null ? formatMoney(price) : "—";
+                          })()}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="panel-divider" style={{ margin: "16px 0" }} />
+
+            <div className="toolbar-group">
+              <label className="toolbar-label">Parts subtotal</label>
+              <div>{formatMoney(partsSubtotal)}</div>
+            </div>
+
+            <div className="toolbar-group">
+              <label className="toolbar-label">Margin %</label>
+              <input
+                type="number"
+                className="toolbar-input"
+                min={0}
+                max={95}
+                step={1}
+                value={marginPercent}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (Number.isNaN(val)) {
+                    setMarginPercent(0);
+                  } else {
+                    setMarginPercent(val);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="toolbar-group">
+              <label className="toolbar-label">Final price</label>
+              <div>{formatMoney(finalPrice)}</div>
+            </div>
+
+            <div className="panel-divider" style={{ margin: "16px 0" }} />
+
+            <div className="toolbar-group" style={{ display: "flex", gap: 8 }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleSaveDraft}
+                disabled={!allRequiredSelected}
+              >
+                Save draft (local)
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={!allRequiredSelected}
+                onClick={() => {
+                  alert(
+                    "Compatibility validation and backend persistence for this build will be added in the next phase."
+                  );
+                }}
+              >
+                Validate build
+              </button>
+            </div>
+
+            {!allRequiredSelected && (
+              <p className="panel-subtitle" style={{ marginTop: 8 }}>
+                To save this build, choose a CPU, motherboard, cooler, and give the
+                build a name.
+              </p>
+            )}
+          </div>
+        </aside>
       </div>
     </section>
   );
