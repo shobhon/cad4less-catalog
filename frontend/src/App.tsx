@@ -2089,6 +2089,13 @@ const App: React.FC = () => {
 
   return (
     <div className="app-root">
+      <header className="panel-header" style={{ marginBottom: "24px" }}>
+        <h1>CAD4Less Catalog Admin</h1>
+        <p className="panel-subtitle">
+          Genesis internal tool to import parts, configure CAD‑optimized PC builds, and export products to cad4less.com.
+        </p>
+      </header>
+
       <nav className="tabs" style={{ marginBottom: "32px" }}>
         <button
           type="button"
