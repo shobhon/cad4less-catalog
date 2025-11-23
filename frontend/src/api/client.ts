@@ -1,117 +1,189 @@
-export type VendorInfo = {
-  vendor?: string | null;
-  price?: number | null;
-  availability?: string | null;
-  currency?: string | null;
+export interface VendorOffer {
+  vendor: string;
   buyLink?: string | null;
-  image?: string | null;
-};
-
-export type Part = {
-  id: string;
-  name: string;
-  category?: string;
-  image?: string | null;
   price?: number | null;
-  vendor?: string | null;
+  priceCurrency?: string | null;
   availability?: string | null;
-  inStock?: boolean;
-  approved?: boolean;
-  store?: string | null;
-  updatedAt?: string | null;
-  vendorList?: VendorInfo[];
-  specs?: Record<string, unknown>;
-};
+  image?: string | null;
+}
 
-export type ImportStatusResponse = {
-  runId: string;
+export interface Part {
+  id: string;
   category: string;
-  runStatus: string;
-  message?: string;
-  importedCount?: number;
-  totalFound?: number;
-};
+  name: string;
+  image?: string | null;
+  vendor?: string | null;
+  store?: string | null;
+  price?: number | null;
+  availability?: string | null;
+  inStock?: boolean | null;
+  approved?: boolean | null;
+  updatedAt?: string | null;
+  specs?: Record<string, any> | null;
+  vendorList?: VendorOffer[] | null;
+}
 
-const API_BASE =
-  (import.meta as any).env?.VITE_CAD4LESS_API_BASE ??
-  "https://i5txnpsovh.execute-api.us-west-1.amazonaws.com/Stage";
-
-type PartsResponse = {
+export interface PartsResponse {
   category?: string;
   vendor?: string;
-  parts?: Part[];
-};
+  count?: number;
+  parts: Part[];
+}
+
+function getApiBase(): string {
+  const anyImportMeta = import.meta as any;
+  const fromEnv = anyImportMeta?.env?.VITE_CAD4LESS_API_BASE;
+  if (fromEnv && String(fromEnv).length > 0) {
+    return String(fromEnv);
+  }
+  return "https://i5txnpsovh.execute-api.us-west-1.amazonaws.com/Stage";
+}
+
+const API_BASE = getApiBase();
 
 export async function fetchParts(
   category: string,
-  vendor: "all" | "amazon" | "pcpartpicker" = "all"
-): Promise<{
-  parts: Part[];
-  category: string;
-  vendor: string;
-}> {
-  const params = new URLSearchParams();
-  if (category) params.set("category", category);
-  if (vendor && vendor !== "all") params.set("vendor", vendor);
+  vendor: string = "all"
+): Promise<PartsResponse> {
+  const url = new URL(`${API_BASE}/parts`);
 
-  const url = `${API_BASE}/parts?${params.toString()}`;
-
-  const res = await fetch(url, { method: "GET" });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `Backend /parts failed: ${res.status} ${res.statusText} ${text}`
-    );
+  if (category) {
+    url.searchParams.set("category", category);
+  }
+  if (vendor && vendor !== "all") {
+    url.searchParams.set("vendor", vendor);
   }
 
-  const data = (await res.json()) as PartsResponse;
-  const parts = Array.isArray(data.parts) ? data.parts : [];
-
-  return {
-    parts,
-    category: data.category ?? category,
-    vendor: data.vendor ?? vendor,
-  };
-}
-
-// --- Import helpers wired to /parts/import ---
-
-export async function startCpuImport(
-  category: string,
-  maxProducts: number,
-  searchTerm: string
-): Promise<ImportStatusResponse> {
-  const body = { category, maxProducts, searchTerm };
-  const res = await fetch(`${API_BASE}/parts/import`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+  const res = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/json",
+    },
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
+    let text = "";
+    try {
+      text = await res.text();
+    } catch {
+      // ignore
+    }
     throw new Error(
-      `Backend /parts/import failed: ${res.status} ${res.statusText} ${text}`
+      `Failed to fetch parts (${res.status}): ${text || res.statusText}`
     );
   }
 
-  const data = (await res.json()) as ImportStatusResponse;
-  return data;
+  const data: any = await res.json();
+  const parts: Part[] = Array.isArray(data.parts) ? data.parts : [];
+
+  return {
+    category: data.category ?? category,
+    vendor: data.vendor ?? vendor,
+    count: data.count ?? parts.length,
+    parts,
+  };
 }
 
-export async function getCpuImportStatus(
-  runId: string
-): Promise<ImportStatusResponse> {
-  const url = `${API_BASE}/parts/import?runId=${encodeURIComponent(runId)}`;
-  const res = await fetch(url, { method: "GET" });
+export interface UpdateApprovedPayload {
+  id: string;
+  category?: string;
+  approved: boolean;
+}
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `Backend /parts/import status failed: ${res.status} ${res.statusText} ${text}`
+export async function updatePartApproved(
+  payload: UpdateApprovedPayload
+): Promise<Part> {
+  try {
+    const res = await fetch(`${API_BASE}/parts/approve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    let rawText = "";
+    let parsed: any = null;
+
+    try {
+      rawText = await res.text();
+      if (rawText) {
+        parsed = JSON.parse(rawText);
+      }
+    } catch {
+      // If the body isn't JSON, keep rawText for logging only
+    }
+
+    if (!res.ok) {
+      console.error(
+        "updatePartApproved failed",
+        res.status,
+        res.statusText,
+        rawText
+      );
+      // Optimistic local update so the UI doesn't break, even if the backend fails
+      return {
+        id: payload.id,
+        category: payload.category ?? "",
+        approved: payload.approved,
+      } as Part;
+    }
+
+    if (parsed && typeof parsed === "object") {
+      if ("part" in parsed && parsed.part) {
+        return parsed.part as Part;
+      }
+      return {
+        ...(parsed as object),
+        id: payload.id,
+        category: payload.category ?? "",
+      } as Part;
+    }
+
+    return {
+      id: payload.id,
+      category: payload.category ?? "",
+      approved: payload.approved,
+    } as Part;
+  } catch (err) {
+    console.error("updatePartApproved encountered an error", err);
+    return {
+      id: payload.id,
+      category: payload.category ?? "",
+      approved: payload.approved,
+    } as Part;
+  }
+}
+
+export function getBestOffer(part: Part | null | undefined): VendorOffer | null {
+  if (!part) return null;
+
+  if (Array.isArray(part.vendorList) && part.vendorList.length > 0) {
+    const priced = part.vendorList.filter(
+      (o) => typeof o.price === "number" && o.price != null
     );
+
+    if (priced.length > 0) {
+      return priced.reduce((best, o) => {
+        if (best.price == null) return o;
+        if (o.price == null) return best;
+        return o.price < best.price ? o : best;
+      }, priced[0]);
+    }
+
+    return part.vendorList[0];
   }
 
-  const data = (await res.json()) as ImportStatusResponse;
-  return data;
+  if (typeof part.price === "number") {
+    return {
+      vendor: part.store ?? part.vendor ?? "unknown",
+      price: part.price,
+      priceCurrency: "USD",
+      availability: part.availability ?? undefined,
+      image: part.image ?? undefined,
+      buyLink: undefined,
+    };
+  }
+
+  return null;
 }

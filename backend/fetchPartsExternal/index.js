@@ -27,6 +27,77 @@ exports.handler = async (event) => {
       return jsonResponse(200, { message: 'OK' });
     }
 
+    // Toggle "approved" (use in builds) flag via POST /admin/parts/approved
+    if (
+      httpMethod === 'POST' &&
+      (path.endsWith('/admin/parts/approved') || resource === '/admin/parts/approved')
+    ) {
+      const rawBody = event.body || '';
+      const decodedBody = event.isBase64Encoded
+        ? Buffer.from(rawBody, 'base64').toString('utf8')
+        : rawBody;
+
+      if (!decodedBody) {
+        return jsonResponse(400, { message: 'Missing request body' });
+      }
+
+      let payload;
+      try {
+        payload = JSON.parse(decodedBody);
+      } catch (err) {
+        return jsonResponse(400, {
+          message: 'Request body must be JSON with shape { id, approved }',
+          error: err.message,
+        });
+      }
+
+      const { id, approved } = payload || {};
+
+      if (!id || typeof id !== 'string') {
+        return jsonResponse(400, { message: 'Field "id" is required and must be a string.' });
+      }
+
+      const approvedFlag = approved === true;
+
+      if (!PARTS_TABLE_NAME) {
+        console.error('PARTS_TABLE_NAME env var is not set');
+        return jsonResponse(500, { message: 'Server not configured with PARTS_TABLE_NAME' });
+      }
+
+      const now = new Date().toISOString();
+
+      const params = {
+        TableName: PARTS_TABLE_NAME,
+        Key: { id },
+        UpdateExpression: 'SET #approved = :approved, #updatedAt = :updatedAt',
+        ExpressionAttributeNames: {
+          '#approved': 'approved',
+          '#updatedAt': 'updatedAt',
+        },
+        ExpressionAttributeValues: {
+          ':approved': approvedFlag,
+          ':updatedAt': now,
+        },
+        ReturnValues: 'UPDATED_NEW',
+      };
+
+      try {
+        const result = await dynamoDb.update(params).promise();
+        return jsonResponse(200, {
+          message: 'Approved flag updated',
+          id,
+          approved: approvedFlag,
+          attributes: result.Attributes || null,
+        });
+      } catch (err) {
+        console.error('Error updating approved flag for part', id, err);
+        return jsonResponse(500, {
+          message: 'Failed to update approved flag',
+          error: err.message,
+        });
+      }
+    }
+
     // CSV import via POST /parts/import-csv
     if (httpMethod === 'POST' && (path.endsWith('/parts/import-csv') || resource === '/parts/import-csv')) {
       const rawBody = event.body || '';
@@ -204,6 +275,14 @@ function mapRowToPartRecord(row, category) {
     row.inStock ||
     'unknown';
 
+  const normalizedAvailability = String(availability).toLowerCase();
+  const inStock =
+    normalizedAvailability.includes('in stock') ||
+    normalizedAvailability.includes('instock') ||
+    normalizedAvailability.includes('available') ||
+    normalizedAvailability === 'yes' ||
+    normalizedAvailability === 'true';
+
   const vendor = row.vendor || row.Vendor || row.seller || row.Seller || row.source || row.Source || 'unknown';
 
   const image =
@@ -253,6 +332,8 @@ function mapRowToPartRecord(row, category) {
     availability,
     image,
     vendorList: [vendorEntry],
+    inStock,
+    approved: false,
   };
 }
 
@@ -276,7 +357,7 @@ async function upsertPart(record) {
     TableName: PARTS_TABLE_NAME,
     Key: { id: record.id },
     UpdateExpression:
-      'SET #category = :category, #name = :name, #price = :price, #vendor = :vendor, #availability = :availability, #image = :image, #vendorList = :vendorList, #updatedAt = :updatedAt',
+      'SET #category = :category, #name = :name, #price = :price, #vendor = :vendor, #availability = :availability, #image = :image, #vendorList = :vendorList, #inStock = :inStock, #approved = :approved, #updatedAt = :updatedAt',
     ExpressionAttributeNames: {
       '#category': 'category',
       '#name': 'name',
@@ -285,6 +366,8 @@ async function upsertPart(record) {
       '#availability': 'availability',
       '#image': 'image',
       '#vendorList': 'vendorList',
+      '#inStock': 'inStock',
+      '#approved': 'approved',
       '#updatedAt': 'updatedAt',
     },
     ExpressionAttributeValues: {
@@ -295,6 +378,8 @@ async function upsertPart(record) {
       ':availability': record.availability,
       ':image': record.image || 'https://example.com/images/placeholder.png',
       ':vendorList': record.vendorList,
+      ':inStock': !!record.inStock,
+      ':approved': record.approved === true,
       ':updatedAt': now,
     },
   };
