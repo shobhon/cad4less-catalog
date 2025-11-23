@@ -152,6 +152,36 @@ Resources:
             Path: /parts/pending
             Method: GET
 
+  #####################################################
+  # PC Builds CRUD
+  #####################################################
+
+  PcBuildsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/pcBuilds/
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          BUILDS_TABLE_NAME: Cad4LessPcBuilds
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Cad4LessPcBuilds
+      Events:
+        ListAndCreateBuilds:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /builds
+            Method: ANY
+        SingleBuildOperations:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /builds/{buildId}
+            Method: ANY
+
 Outputs:
   ApiUrl:
     Description: Base URL for CAD4Less API

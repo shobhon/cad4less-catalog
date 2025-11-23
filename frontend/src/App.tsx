@@ -6,6 +6,13 @@ type SortKey = "name-asc" | "price-asc" | "price-desc";
 
 const PAGE_SIZE = 10;
 
+const socketCellStyle: React.CSSProperties = {
+  whiteSpace: "nowrap",
+  maxWidth: "220px",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
 function deepFindString(obj: any, keyTest: (key: string) => boolean): string | null {
   const stack: any[] = [obj];
   while (stack.length) {
@@ -179,9 +186,7 @@ function getSocket(p: Part): string {
   }
 
   // Keys that *mention* socket inside specs
-  const socketKey = Object.keys(specs).find((k) =>
-    k.toLowerCase().includes("socket")
-  );
+  const socketKey = Object.keys(specs).find((k) => k.toLowerCase().includes("socket"));
   if (socketKey) {
     const v = specs[socketKey];
     if (v != null && String(v).trim() && !/^https?:\/\//i.test(String(v))) {
@@ -208,9 +213,7 @@ function getSocket(p: Part): string {
   }
 
   // Deep fallback: look anywhere in the object for a field whose key mentions "socket".
-  const deepSocket = deepFindString(anyPart, (key) =>
-    key.toLowerCase().includes("socket")
-  );
+  const deepSocket = deepFindString(anyPart, (key) => key.toLowerCase().includes("socket"));
   if (deepSocket && !/^https?:\/\//i.test(deepSocket)) {
     return deepSocket;
   }
@@ -635,7 +638,9 @@ function CatalogDashboard() {
   const [activeSocket, setActiveSocket] = useState<string | null>(null);
   const [activeSocketLabel, setActiveSocketLabel] = useState<string | null>(null);
   const [activeSocketKeys, setActiveSocketKeys] = useState<string[]>([]);
-  const [activeSource, setActiveSource] = useState<"cpu" | "motherboard" | "cooler" | null>(null);
+  const [activeSource, setActiveSource] = useState<"cpu" | "motherboard" | "cooler" | null>(
+    null
+  );
 
   const clearCompatibilityFilter = React.useCallback(() => {
     setActiveSocket(null);
@@ -805,11 +810,11 @@ function CatalogDashboard() {
   const totalParts = cpuTotal + mbTotal + coolerTotal;
 
   return (
-    <div className="app-root">
+    <>
       {/* Overview tile */}
       <section className="panel">
         <header className="panel-header">
-          <h2>CAD4Less Catalog Admin</h2>
+          <h2>Select Parts for PC Builds</h2>
           <p className="panel-subtitle">
             Internal dashboard for CPUs, motherboards, and CPU coolers. Use the
             &quot;Use in builds&quot; column to mark parts that should be available
@@ -1014,7 +1019,9 @@ function CatalogDashboard() {
                             </a>
                           )}
                         </td>
-                        <td>{socket || "—"}</td>
+                        <td style={socketCellStyle} title={socket || undefined}>
+                          {socket || "—"}
+                        </td>
                         <td>
                           {storeUrl ? (
                             <a
@@ -1254,7 +1261,9 @@ function CatalogDashboard() {
                                     item.id === p.id ? { ...item, approved: !next } : item
                                   )
                                 );
-                                alert("Failed to save selection for this motherboard.");
+                                alert(
+                                  "Failed to save selection for this motherboard."
+                                );
                               }
                             }}
                           />
@@ -1272,7 +1281,9 @@ function CatalogDashboard() {
                             </a>
                           )}
                         </td>
-                        <td>{socket || "—"}</td>
+                        <td style={socketCellStyle} title={socket || undefined}>
+                          {socket || "—"}
+                        </td>
                         <td>{storeCell}</td>
                         <td>{priceCell}</td>
                       </tr>
@@ -1475,7 +1486,9 @@ function CatalogDashboard() {
                             </a>
                           )}
                         </td>
-                        <td>{socket || "—"}</td>
+                        <td style={socketCellStyle} title={socket || undefined}>
+                          {socket || "—"}
+                        </td>
                         <td>
                           {storeUrl ? (
                             <a
@@ -1524,27 +1537,145 @@ function CatalogDashboard() {
           </>
         )}
       </section>
-
-      {/* 4. Quick Build Calculator (placeholder) */}
-      <section className="panel">
-        <header className="panel-header">
-          <h2>4. Quick Build Calculator</h2>
-          <p className="panel-subtitle">
-            In the next phase we will wire this up to choose a CPU, a compatible
-            motherboard and cooler, and calculate a suggested selling price.
-          </p>
-        </header>
-        <div className="panel-body">
-          <p>
-            Placeholder for the build calculator. For now, use the three catalogs above
-            to choose matching parts.
-          </p>
-        </div>
-      </section>
-    </div>
+    </>
   );
 }
 
-const App: React.FC = () => <CatalogDashboard />;
+// --- Begin: Add Parts Tab ---
+const AddPartsTab: React.FC = () => {
+  return (
+    <section className="panel">
+      <header className="panel-header">
+        <h2>Add Parts</h2>
+        <p className="panel-subtitle">
+          This tab will handle importing or uploading new parts into the catalog
+          (API imports, CSV uploads, etc.).
+        </p>
+      </header>
+      <div className="panel-body">
+        <p>
+          In a later step, we&apos;ll connect this screen to the backend to add
+          parts from sources like PCPartPicker, Amazon, Newegg, and CSV files.
+        </p>
+      </div>
+    </section>
+  );
+};
+
+// --- Begin: New PC Build Tab ---
+const NewPcBuildTab: React.FC = () => {
+  return (
+    <section className="panel">
+      <header className="panel-header">
+        <h2>New PC Build</h2>
+        <p className="panel-subtitle">
+          This tab will guide you through creating a new CAD4Less PC build using the
+          approved parts. In the next phases we&apos;ll add CPU → motherboard →
+          cooler selection, compatibility checks, and margin-based pricing.
+        </p>
+      </header>
+      <div className="panel-body">
+        <p>
+          For now, use the &quot;Select Parts for PC Builds&quot; tab to mark which
+          CPUs, motherboards, and coolers are eligible for builds. Then we&apos;ll wire
+          this screen to pick from those approved parts and calculate a suggested
+          selling price.
+        </p>
+      </div>
+    </section>
+  );
+};
+
+// --- Begin: Catalog Tab ---
+const CatalogTab: React.FC = () => {
+  return (
+    <section className="panel">
+      <header className="panel-header">
+        <h2>Catalog</h2>
+        <p className="panel-subtitle">
+          This tab will list saved PC builds that are ready to be exported to Shopify
+          as products for cad4less.com.
+        </p>
+      </header>
+      <div className="panel-body">
+        <p>
+          In a later step, we&apos;ll show all builds created in the &quot;New PC
+          Build&quot; tab, including profile (Economy / Standard / Premium / AI),
+          cost breakdown, and Shopify export status.
+        </p>
+      </div>
+    </section>
+  );
+};
+
+// --- App with Tab Navigation ---
+const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<
+    "add-parts" | "select-parts" | "new-build" | "catalog"
+  >("select-parts");
+
+  const tabButtonClass = (
+    tab: "add-parts" | "select-parts" | "new-build" | "catalog"
+  ) =>
+    [
+      "tabs-tab",
+      "btn",
+      activeTab === tab ? "btn-primary" : "btn-secondary",
+      activeTab === tab ? "tabs-tab--active" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+  const tabLabelStyle: React.CSSProperties = {
+    fontSize: "18px",
+    fontWeight: 700,
+  };
+
+  return (
+    <div className="app-root">
+      <nav className="tabs" style={{ marginBottom: "32px" }}>
+        <button
+          type="button"
+          className={tabButtonClass("add-parts")}
+          style={tabLabelStyle}
+          onClick={() => setActiveTab("add-parts")}
+        >
+          Add Parts
+        </button>
+        <button
+          type="button"
+          className={tabButtonClass("select-parts")}
+          style={tabLabelStyle}
+          onClick={() => setActiveTab("select-parts")}
+        >
+          Select Parts for PC Builds
+        </button>
+        <button
+          type="button"
+          className={tabButtonClass("new-build")}
+          style={tabLabelStyle}
+          onClick={() => setActiveTab("new-build")}
+        >
+          New PC Build
+        </button>
+        <button
+          type="button"
+          className={tabButtonClass("catalog")}
+          style={tabLabelStyle}
+          onClick={() => setActiveTab("catalog")}
+        >
+          Catalog
+        </button>
+      </nav>
+
+      <main className="tab-content">
+        {activeTab === "add-parts" && <AddPartsTab />}
+        {activeTab === "select-parts" && <CatalogDashboard />}
+        {activeTab === "new-build" && <NewPcBuildTab />}
+        {activeTab === "catalog" && <CatalogTab />}
+      </main>
+    </div>
+  );
+};
 
 export default App;
