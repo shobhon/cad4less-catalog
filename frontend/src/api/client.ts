@@ -1,6 +1,4 @@
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE ||
-  "https://i5txnpsovh.execute-api.us-west-1.amazonaws.com/Stage";
+import { API_BASE } from "./parts";
 
 // LocalStorage-based persistence for "Use in builds" state
 const LOCAL_IN_BUILDS_KEY = "cad4less_inBuilds_v1";
@@ -98,7 +96,17 @@ export async function fetchParts(
   const params = new URLSearchParams({ category });
   if (vendor && vendor !== "all") params.set("vendor", vendor);
 
-  const res = await fetch(`${API_BASE}/parts?${params.toString()}`);
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/parts?${params.toString()}`);
+  } catch (err) {
+    throw new Error(
+      `Network error while fetching parts for ${category}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
+
   if (!res.ok) {
     throw new Error(
       `Failed to fetch parts for ${category}: ${res.status} ${res.statusText}`
@@ -187,19 +195,54 @@ export async function runApifyImport(
   itemCount: number;
   items?: unknown[];
 }> {
-  const res = await fetch(
-    `${API_BASE}/imports/apify/${encodeURIComponent(category)}`,
-    {
+  const csvGuess = datasetId.trim();
+  const result = await importPartsFromCsv(category, csvGuess);
+
+  return {
+    status: result.message,
+    category,
+    datasetId,
+    itemCount: typeof result.succeeded === "number"
+      ? result.succeeded
+      : result.attempted,
+    items: [],
+  };
+}
+
+export interface ImportCsvResult {
+  message: string;
+  attempted: number;
+  succeeded: number;
+  failed: number;
+  skippedNotInStock: number;
+  errors: unknown[];
+}
+
+export async function importPartsFromCsv(
+  category: Category,
+  csv: string
+): Promise<ImportCsvResult> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/parts/import-csv`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ datasetId }),
-    }
-  );
+      body: JSON.stringify({ category, csv }),
+    });
+  } catch (err) {
+    throw new Error(
+      `Network error while importing CSV parts for ${category}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(
-      `Apify import failed (${res.status} ${res.statusText}): ${text}`
+      `CSV parts import failed (${res.status} ${res.statusText}): ${text}`
     );
   }
-  return res.json();
+
+  return (await res.json()) as ImportCsvResult;
 }

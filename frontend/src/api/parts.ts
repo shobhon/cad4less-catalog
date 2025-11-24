@@ -28,15 +28,42 @@ export interface PartsResponse {
   parts: Part[]
 }
 
-const API_BASE =
+// 🔹 Export API_BASE so all API helpers (including Add Parts) can share it
+export const API_BASE =
   import.meta.env.VITE_API_BASE_URL ??
   "https://i5txnpsovh.execute-api.us-west-1.amazonaws.com/Stage"
 
+// 🔹 Shared helper for consistent error handling and nicer messages
+async function handleJsonResponse<T>(
+  res: Response,
+  context: string
+): Promise<T> {
+  if (!res.ok) {
+    let details = ""
+
+    try {
+      const data = await res.json()
+      if (data && typeof data === "object" && "error" in data) {
+        details = ` – ${(data as any).error}`
+      }
+    } catch {
+      // ignore JSON parse errors; keep basic status info
+    }
+
+    throw new Error(`${context}: ${res.status} ${res.statusText}${details}`)
+  }
+
+  return (await res.json()) as T
+}
+
+// Existing CPU fetch with improved error handling
 export async function fetchCpuParts(): Promise<PartsResponse> {
   const res = await fetch(`${API_BASE}/parts?category=cpu`)
-  if (!res.ok) {
-    throw new Error(`Failed to fetch CPUs: ${res.status} ${res.statusText}`)
-  }
-  const data = (await res.json()) as PartsResponse
-  return data
+  return handleJsonResponse<PartsResponse>(res, "Failed to fetch CPUs")
+}
+
+// General fetch used by the Select Parts for PC Builds tab
+export async function fetchParts(): Promise<PartsResponse[]> {
+  const res = await fetch(`${API_BASE}/parts/approved`)
+  return handleJsonResponse<PartsResponse[]>(res, "Failed to fetch parts")
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchParts, Part, updatePartApproved, runApifyImport } from "./api/client";
+import { fetchParts, Part, updatePartApproved, runApifyImport, importPartsFromCsv } from "./api/client";
 import { formatMoney, getBestPrice as baseGetBestPrice } from "./utils";
 
 type SortKey = "name-asc" | "price-asc" | "price-desc";
@@ -1561,56 +1561,66 @@ function CatalogDashboard() {
 // --- Begin: Add Parts Tab ---
 const AddPartsTab: React.FC = () => {
   const [category, setCategory] = useState<ApifyCategory>("cpu");
-  const [searchPhrases, setSearchPhrases] = useState<string[]>([""]);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [csvText, setCsvText] = useState<string>("");
+  const [isImporting, setIsImporting] = useState<boolean>(false);
   const [status, setStatus] = useState<string | null>(null);
-  const [maxItems, setMaxItems] = useState<string>("");
 
-  const handleRunApifyImport = async () => {
-    const phrases = searchPhrases.map((p) => p.trim()).filter(Boolean);
-    if (!phrases.length) {
-      setStatus("Enter at least one search phrase to run an import.");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      setCsvText(text);
+      setStatus(
+        `Loaded ${file.name}. Review the CSV below, then click "Import CSV" to add parts.`
+      );
+    };
+    reader.onerror = () => {
+      console.error("Failed to read CSV file", reader.error);
+      setStatus(
+        "Error: Could not read that CSV file. Try again or paste the CSV content instead."
+      );
+    };
+    reader.readAsText(file);
+  };
+
+  const handleImportCsv = async () => {
+    const trimmed = csvText.trim();
+    if (!trimmed) {
+      setStatus(
+        "Error: Please paste CSV content or load a CSV file before importing."
+      );
       return;
     }
 
-    setIsRunning(true);
+    setIsImporting(true);
     setStatus(null);
 
-    // Parse and validate maxItems
-    const maxItemsNumber =
-      maxItems.trim() !== "" ? Number.parseInt(maxItems.trim(), 10) : undefined;
-
-    if (
-      maxItemsNumber !== undefined &&
-      (!Number.isFinite(maxItemsNumber) || maxItemsNumber <= 0)
-    ) {
-      setIsRunning(false);
-      setStatus('Enter a positive number in "Max products" or leave it blank.');
-      return;
-    }
-
     try {
-      const result = await runApifyImport(category, phrases, maxItemsNumber);
-      const count =
-        Array.isArray((result as any).searchPhrases) &&
-        (result as any).searchPhrases.length > 0
-          ? (result as any).searchPhrases.length
-          : phrases.length;
-      setStatus(
-        `Apify import completed: ${result.itemCount} items found for category "${result.category}" using ${count} search phrase${
-          count === 1 ? "" : "s"
-        }.`
-      );
+      const result = await importPartsFromCsv(category as any, trimmed);
+      console.log("CSV import result", result);
+
+      const attempted = (result as any)?.attempted ?? 0;
+      const succeeded = (result as any)?.succeeded ?? 0;
+      const failed = (result as any)?.failed ?? 0;
+      const skippedNotInStock = (result as any)?.skippedNotInStock ?? 0;
+      const message = (result as any)?.message as string | undefined;
+
+      const summary = `CSV import completed for "${category}": ${succeeded}/${attempted} succeeded, ${failed} failed, ${skippedNotInStock} skipped (not in stock).`;
+
+      setStatus(message ? `${summary} Message: ${message}` : summary);
     } catch (err: any) {
-      console.error("Apify import error", err);
+      console.error("CSV import error", err);
       setStatus(
         `Error: ${
           err?.message ??
-          "Unable to run the Apify import. Check the browser console or network tab for details, or contact an administrator."
+          "Unable to import CSV. Check the browser console or network tab for details, or contact an administrator."
         }`
       );
     } finally {
-      setIsRunning(false);
+      setIsImporting(false);
     }
   };
 
@@ -1619,9 +1629,10 @@ const AddPartsTab: React.FC = () => {
       <header className="panel-header">
         <h2>Add Parts</h2>
         <p className="panel-subtitle">
-          Pull fresh parts data into the catalog from Apify-powered scrapes. Use this
-          step to confirm the connection and see how many items are available in each
-          component category.
+          Add new parts by pasting CSV data or uploading a .csv file. Choose the part
+          category, load your CSV, then click <strong>Import CSV</strong>. Successful
+          imports will show up in the &quot;Select Parts for PC Builds&quot; tab after
+          you reload that list.
         </p>
       </header>
       <div className="panel-body">
@@ -1629,13 +1640,13 @@ const AddPartsTab: React.FC = () => {
           className="toolbar"
           style={{ marginBottom: 16, alignItems: "flex-start" }}
         >
-          {/* Left: Category selection (occupies the large left area) */}
-          <div className="toolbar-group toolbar-group--grow">
-            <label className="toolbar-label" htmlFor="apify-category">
+          {/* Category selection */}
+          <div className="toolbar-group">
+            <label className="toolbar-label" htmlFor="csv-category">
               Category
             </label>
             <select
-              id="apify-category"
+              id="csv-category"
               className="toolbar-select"
               value={category}
               onChange={(e) => setCategory(e.target.value as ApifyCategory)}
@@ -1656,103 +1667,53 @@ const AddPartsTab: React.FC = () => {
               <option value="peripherals">Peripherals</option>
               <option value="accessories-other">Accessories / Other</option>
             </select>
-            <div style={{ marginTop: 12 }}>
-              <label
-                className="toolbar-label"
-                htmlFor="apify-max-items"
-                style={{ display: "block" }}
-              >
-                Max products{" "}
-                <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional)</span>
+          </div>
+
+          {/* CSV text area + file upload */}
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label" htmlFor="csv-text">
+              CSV content
+            </label>
+            <textarea
+              id="csv-text"
+              className="toolbar-input"
+              rows={10}
+              placeholder={
+                "Example:\nname,price,availability\nTest RAM 16GB,49.99,In stock"
+              }
+              value={csvText}
+              onChange={(e) => setCsvText(e.target.value)}
+            />
+            <div className="panel-subtitle" style={{ fontSize: 12, marginTop: 8 }}>
+              Paste CSV rows here. The first line should contain column headers like
+              <code> name, price, availability </code>.
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <label className="toolbar-label" htmlFor="csv-file">
+                Or upload a .csv file
               </label>
               <input
-                id="apify-max-items"
+                id="csv-file"
+                type="file"
+                accept=".csv,text/csv"
                 className="toolbar-input"
-                type="number"
-                min={1}
-                step={1}
-                placeholder="e.g. 50"
-                value={maxItems}
-                onChange={(e) => setMaxItems(e.target.value)}
+                onChange={handleFileChange}
               />
-            </div>
-          </div>
-
-          {/* Right: Search phrases + controls */}
-          <div className="toolbar-group toolbar-group--grow">
-            <label className="toolbar-label">Search phrase(s)</label>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {searchPhrases.map((phrase, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <span style={{ width: 16 }}>{index + 1}</span>
-                  <input
-                    className="toolbar-input"
-                    type="text"
-                    placeholder="e.g. LGA1155"
-                    value={phrase}
-                    onChange={(e) => {
-                      const next = [...searchPhrases];
-                      next[index] = e.target.value;
-                      setSearchPhrases(next);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      const next = searchPhrases.filter((_, i) => i !== index);
-                      setSearchPhrases(next.length ? next : [""]);
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setSearchPhrases((prev) => [...prev, ""])}
-                >
-                  + Add
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() =>
-                    setSearchPhrases((prev) => {
-                      const cleaned = prev.map((p) => p.trim()).filter(Boolean);
-                      return cleaned.length ? cleaned : [""];
-                    })
-                  }
-                >
-                  Remove empty fields
-                </button>
-              </div>
-              <div className="panel-subtitle" style={{ fontSize: 12 }}>
-                Leave any unused rows blank—empty fields are cleaned up automatically.
+              <div className="panel-subtitle" style={{ fontSize: 12, marginTop: 4 }}>
+                When you choose a file, its contents will be loaded into the box above.
               </div>
             </div>
           </div>
 
-          {/* Far right: Run import button */}
+          {/* Import button */}
           <div className="toolbar-group">
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={handleRunApifyImport}
-              disabled={
-                isRunning || !searchPhrases.some((p) => p.trim().length > 0)
-              }
+              onClick={handleImportCsv}
+              disabled={isImporting || !csvText.trim()}
             >
-              {isRunning ? "Importing…" : "Run Apify import"}
+              {isImporting ? "Importing…" : "Import CSV"}
             </button>
           </div>
         </div>
@@ -1768,12 +1729,6 @@ const AddPartsTab: React.FC = () => {
             {status}
           </div>
         )}
-
-        <p className="panel-subtitle" style={{ marginTop: 16 }}>
-          In a later phase, these Apify results will be normalized and written into the
-          live parts tables so they automatically appear in the &quot;Select Parts for
-          PC Builds&quot; tab.
-        </p>
       </div>
     </section>
   );
