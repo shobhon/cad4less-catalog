@@ -27,26 +27,58 @@ async function getLivePartsFromDynamo(category) {
     throw new Error("TABLE_NAME is not set");
   }
 
+  const normalized = String(category || "").toLowerCase();
+
   console.log("DDB debug", {
     lambdaRegion: process.env.AWS_REGION,
     tableName: TABLE_NAME,
-    category,
+    requestedCategory: category,
+    normalizedCategory: normalized,
   });
 
-  const params = {
-    TableName: TABLE_NAME,
-    FilterExpression: "#cat = :category",
-    ExpressionAttributeNames: { "#cat": "category" },
-    ExpressionAttributeValues: { ":category": category.toLowerCase() },
-  };
+  // Try a few possible stored category spellings to be backward-compatible
+  const ucFirst = category
+    ? category.charAt(0).toUpperCase() + category.slice(1)
+    : "";
 
-  const result = await ddb.send(new ScanCommand(params));
-  const items = result.Items || [];
+  const candidateCategories = Array.from(
+    new Set([
+      category,
+      normalized,
+      ucFirst,
+      // Explicitly include both memory/Memory to cover existing data
+      "memory",
+      "Memory",
+    ].filter(Boolean))
+  );
 
-  return items.filter(
+  let allItems = [];
+
+  for (const cat of candidateCategories) {
+    const params = {
+      TableName: TABLE_NAME,
+      FilterExpression: "#cat = :category",
+      ExpressionAttributeNames: { "#cat": "category" },
+      ExpressionAttributeValues: { ":category": cat },
+    };
+
+    console.log("Scanning table for category", cat, "with params", JSON.stringify(params));
+
+    const result = await ddb.send(new ScanCommand(params));
+    const items = result.Items || [];
+
+    if (items.length) {
+      allItems = allItems.concat(items);
+    }
+  }
+
+  // Final in-memory filter to ensure we only return items that logically
+  // belong to the requested category (case-insensitive match).
+  return allItems.filter(
     (item) =>
+      item &&
       typeof item.category === "string" &&
-      item.category.toLowerCase() === category.toLowerCase()
+      item.category.toLowerCase() === normalized
   );
 }
 

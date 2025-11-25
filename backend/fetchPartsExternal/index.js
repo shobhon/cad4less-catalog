@@ -1,141 +1,108 @@
-// frontend/src/api/client.ts
+const AWS = require("aws-sdk");
 
-export type VendorOffer = {
-  vendor: string;
-  price: number | null;
-  currency?: string | null;
-  availability?: string | null;
-  image?: string | null;
-  buyLink?: string | null;
+// Use the same environment variable convention as other Lambdas
+const TABLE_NAME = process.env.PARTS_TABLE_NAME || "Cad4LessPartsLive";
+console.log("FetchPartsExternal using TABLE_NAME=", TABLE_NAME);
+
+const ddb = new AWS.DynamoDB.DocumentClient();
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
 };
 
-export type Part = {
-  id: string;
-  category: string;
-  name: string;
-  image?: string | null;
-  availability?: string | null;
-  vendor?: string | null;
-  store?: string | null;
-  price?: number | null;
-  vendorList?: VendorOffer[] | null;
-  specs?: Record<string, unknown> | null;
-  inStock?: boolean;
-  approved?: boolean; // persisted flag from DynamoDB
-  updatedAt?: string;
-};
+exports.handler = async (event) => {
+  console.log("FetchPartsExternal event:", JSON.stringify(event));
 
-export type PartsResponse = {
-  category: string;
-  vendor: string;
-  parts: Part[];
-};
-
-const API_BASE: string =
-  (import.meta as any)?.env?.VITE_CAD4LESS_API_BASE ||
-  (typeof process !== "undefined" && (process as any).env?.VITE_CAD4LESS_API_BASE) ||
-  "https://i5txnpsovh.execute-api.us-west-1.amazonaws.com/Stage";
-
-async function doFetch(path: string, init?: RequestInit): Promise<any> {
-  const url = API_BASE.replace(/\/$/, "") + path;
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init && init.headers ? init.headers : {}),
-    },
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Request to ${url} failed with ${res.status}: ${text}`);
+  // Handle preflight
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: "",
+    };
   }
 
-  const ct = res.headers.get("content-type") || "";
-  if (ct.includes("application/json")) {
-    return res.json();
-  }
-  const text = await res.text();
   try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-}
+    const qs = event.queryStringParameters || {};
+    const requestedCategory = qs.category;
+    const vendorFilter = qs.vendor || "all";
 
-export async function fetchParts(
-  category: "cpu" | "motherboard" | "cpu-cooler",
-  vendorFilter: "all" | "amazon" | "pcpartpicker" | string = "all"
-): Promise<PartsResponse> {
-  const qs = new URLSearchParams();
-  if (category) qs.set("category", category);
-  if (vendorFilter) qs.set("vendor", vendorFilter);
+    if (!requestedCategory) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ message: "category query parameter is required" }),
+      };
+    }
 
-  const json = await doFetch(`/parts?${qs.toString()}`);
+    // Support legacy mixed-case categories: try a small set of variants
+    const lc = requestedCategory.toLowerCase();
+    const ucFirst = requestedCategory.charAt(0).toUpperCase() + requestedCategory.slice(1);
+    const candidateCategories = Array.from(new Set([requestedCategory, lc, ucFirst]));
 
-  const rawParts: any[] = Array.isArray(json.parts) ? json.parts : [];
+    let items = [];
 
-  const parts: Part[] = rawParts.map((p) => {
-    const vendorList: VendorOffer[] | null = Array.isArray(p.vendorList)
-      ? p.vendorList.map((v: any) => ({
-          vendor: String(v.vendor ?? "unknown"),
-          price:
-            typeof v.price === "number" && Number.isFinite(v.price)
-              ? v.price
-              : null,
-          currency: v.priceCurrency ?? v.currency ?? null,
-          availability: v.availability ?? null,
-          image: v.image ?? null,
-          buyLink: v.buyLink ?? null,
-        }))
-      : null;
+    for (const cat of candidateCategories) {
+      const params = {
+        TableName: TABLE_NAME,
+        FilterExpression: "#cat = :c",
+        ExpressionAttributeNames: { "#cat": "category" },
+        ExpressionAttributeValues: { ":c": cat },
+      };
+
+      console.log("Scanning table for category", cat, "with params", JSON.stringify(params));
+      const res = await ddb.scan(params).promise();
+      if (res.Items && res.Items.length) {
+        items = items.concat(res.Items);
+      }
+    }
+
+    if (!items.length) {
+      return {
+        statusCode: 404,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          message: `No parts found for category '${requestedCategory}'`,
+        }),
+      };
+    }
+
+    // Optional vendor filter, if provided and not "all"
+    const vf = (vendorFilter || "all").toLowerCase();
+    if (vf !== "all") {
+      items = items.filter((p) => {
+        const store = (p.store || p.vendor || "").toString().toLowerCase();
+        if (store && store === vf) return true;
+
+        if (Array.isArray(p.vendorList)) {
+          return p.vendorList.some((v) =>
+            v && typeof v.vendor === "string" && v.vendor.toLowerCase() === vf
+          );
+        }
+
+        return false;
+      });
+    }
+
+    const responseBody = {
+      category: requestedCategory,
+      vendor: vendorFilter || "all",
+      parts: items,
+    };
 
     return {
-      id: String(p.id),
-      category: String(p.category ?? category),
-      name: String(p.name ?? "Unnamed part"),
-      image: p.image ?? null,
-      availability: p.availability ?? null,
-      vendor: p.vendor ?? null,
-      store: p.store ?? null,
-      price:
-        typeof p.price === "number" && Number.isFinite(p.price)
-          ? p.price
-          : null,
-      vendorList,
-      specs: p.specs ?? null,
-      inStock: p.inStock === true,
-      approved: p.approved === true, // IMPORTANT: persist approved from backend
-      updatedAt: p.updatedAt ?? undefined,
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify(responseBody),
     };
-  });
-
-  return {
-    category: String(json.category ?? category ?? "all"),
-    vendor: String(json.vendor ?? vendorFilter ?? "all"),
-    parts,
-  };
-}
-
-export async function updatePartApproved(
-  id: string,
-  approved: boolean
-): Promise<{ success: boolean; id: string; approved: boolean }> {
-  if (!id) {
-    throw new Error("Part id is required for updatePartApproved");
+  } catch (err) {
+    console.error("FetchPartsExternal error:", err);
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ message: "Internal server error", error: err.message }),
+    };
   }
-
-  const qs = new URLSearchParams();
-  qs.set("action", "updateApproved");
-  qs.set("id", id);
-  qs.set("approved", approved ? "true" : "false");
-
-  const json = await doFetch(`/parts?${qs.toString()}`);
-
-  // Backend may return either {success:true,id,approved} or {message:"Approved flag updated", id, approved}
-  return {
-    success: json.success === true || json.message === "Approved flag updated",
-    id: json.id ?? id,
-    approved: json.approved === true,
-  };
-}
+};

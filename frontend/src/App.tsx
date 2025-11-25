@@ -663,10 +663,31 @@ function CatalogDashboard() {
 
   // ---- Compatibility filter state ----
   const loadMemory = React.useCallback(async () => {
+    setLoadingMemory(true);
+    setMemoryError(null);
+
     try {
-      setLoadingMemory(true);
-      setMemoryError(null);
-      const data = await fetchParts("memory" as any, "all");
+      let data: any;
+
+      try {
+        // First, try the lowercase category used by the rest of the app.
+        data = await fetchParts("memory" as any, "all");
+      } catch (err: any) {
+        const msg = String(err?.message ?? "");
+
+        // If the backend says there are no parts for "memory", fall back to
+        // the capitalized variant used by older imports ("Memory").
+        if (msg.includes("No parts found for category 'memory'")) {
+          console.warn(
+            "No parts found for category 'memory' – falling back to 'Memory'",
+            msg
+          );
+          data = await fetchParts("Memory" as any, "all");
+        } else {
+          throw err;
+        }
+      }
+
       setMemoryParts(data.parts ?? []);
       setMemoryPage(1);
     } catch (err: any) {

@@ -4,19 +4,26 @@ const { json } = require("../common/response");
 const TABLE_NAME = process.env.PARTS_TABLE_NAME;
 
 exports.handler = async (event) => {
+  console.log("ApprovePart event:", JSON.stringify(event));
+
   try {
     const body = JSON.parse(event.body || "{}");
-    const { partId, category, approved } = body;
 
-    if (!partId || !category || typeof approved !== "boolean") {
+    // Support both { partId } and { id } from the frontend
+    const id = body.partId || body.id;
+    const category = body.category;
+    const approved = body.approved;
+
+    if (!id || !category || typeof approved !== "boolean") {
       return json(400, {
-        message: "partId, category, and approved (boolean) are required",
+        message: "id (or partId), category, and approved (boolean) are required",
+        received: { id, category, approved },
       });
     }
 
     const params = {
       TableName: TABLE_NAME,
-      Key: { id: partId },
+      Key: { id, category },
       UpdateExpression: "SET approved = :a",
       ExpressionAttributeValues: {
         ":a": approved,
