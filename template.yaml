@@ -159,6 +159,42 @@ Resources:
             Method: GET
 
   #####################################################
+  # Delete Part (soft delete)
+  #####################################################
+
+  DeletePartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/deletePart/
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          PARTS_TABLE_NAME: Cad4LessPartsLive
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Cad4LessPartsLive
+      Events:
+        DeletePart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/{id}
+            Method: DELETE
+        DeletePartPreflight:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/{id}
+            Method: OPTIONS
+        DeletePartPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/delete
+            Method: POST
+
+  #####################################################
   # PC Builds CRUD
   #####################################################
 

@@ -9,7 +9,7 @@ function jsonResponse(statusCode, body) {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS,DELETE',
       'Access-Control-Allow-Headers': '*',
     },
     body: JSON.stringify(body),
@@ -100,12 +100,26 @@ exports.handler = async (event) => {
         }
       }
 
-      console.log('ImportPartsFunction /parts/import-csv summary:', results);
-      // Force skippedNotInStock to 0 and include a version tag in the message
+      // Normalize CSV import summary so we never report "skipped (not in stock)"
+      if (Array.isArray(rows)) {
+        // Ensure attempted reflects the total number of parsed rows
+        results.attempted = rows.length;
+      }
+
+      // If failed is not a number, treat it as 0
+      if (typeof results.failed !== 'number' || Number.isNaN(results.failed)) {
+        results.failed = 0;
+      }
+
+      // Compute succeeded as attempted - failed, and force skippedNotInStock to 0
+      results.succeeded = Math.max(0, results.attempted - results.failed);
       results.skippedNotInStock = 0;
 
+      console.log('ImportPartsFunction /parts/import-csv summary (normalized):', results);
+
+      // Note: the normalized summary log above already printed detailed results.
       return jsonResponse(200, {
-        message: 'CSV import completed (backend v2)',
+        message: 'CSV import completed',
         ...results,
       });
     }
@@ -449,16 +463,17 @@ async function upsertPart(record) {
     '#vendor = :vendor',
     '#availability = :availability',
     '#inStock = :inStock',
+    '#isDeleted = if_not_exists(#isDeleted, :isDeletedFalse)',
     '#image = if_not_exists(#image, :image)',
     '#vendorList = :vendorList',
     '#updatedAt = :updatedAt',
   ];
 
   if (hasApproved) {
-    updateParts.splice(7, 0, '#approved = :approved');
+    updateParts.push('#approved = :approved');
   }
   if (hasUseInBuilds) {
-    updateParts.splice(8, 0, '#useInBuilds = :useInBuilds');
+    updateParts.push('#useInBuilds = :useInBuilds');
   }
 
   const updateExpression = 'SET ' + updateParts.join(', ');
@@ -471,6 +486,7 @@ async function upsertPart(record) {
     '#vendor': 'vendor',
     '#availability': 'availability',
     '#inStock': 'inStock',
+    '#isDeleted': 'isDeleted',
     '#image': 'image',
     '#vendorList': 'vendorList',
     '#updatedAt': 'updatedAt',
@@ -493,6 +509,7 @@ async function upsertPart(record) {
     ':vendor': record.vendor,
     ':availability': record.availability,
     ':inStock': !!record.inStock,
+    ':isDeletedFalse': false,
     ':image': record.image || 'https://example.com/images/placeholder.png',
     ':vendorList': record.vendorList,
     ':updatedAt': now,

@@ -9,3 +9,14 @@ image_repositories = []
 
 [default.global.parameters]
 region = "us-west-1"
+
+[dev.deploy.parameters]
+stack_name = "cad4less-catalog-stack"
+resolve_s3 = true
+s3_prefix = "cad4less-catalog-stack"
+region = "us-west-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
+[dev.global.parameters]
+region = "us-west-1"

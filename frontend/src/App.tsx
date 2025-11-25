@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fetchParts, Part, updatePartApproved, runApifyImport, importPartsFromCsv } from "./api/client";
+import { deletePart } from "./api/parts";
 import { formatMoney, getBestPrice as baseGetBestPrice } from "./utils";
 
 type SortKey = "name-asc" | "price-asc" | "price-desc";
@@ -979,6 +980,7 @@ function CatalogDashboard() {
                     <th>Socket</th>
                     <th>Store</th>
                     <th>Price</th>
+                    <th>Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1054,6 +1056,36 @@ function CatalogDashboard() {
                           )}
                         </td>
                         <td>{bestPrice != null ? formatMoney(bestPrice) : "—"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert("Cannot delete this CPU because it has no ID.");
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this CPU from the catalog?\n\n${p.name ?? p.id}`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setCpus((prev) => prev.filter((item) => item.id !== p.id));
+                              } catch (err) {
+                                console.error("Failed to delete CPU", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this CPU. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -1196,6 +1228,7 @@ function CatalogDashboard() {
                     <th>Socket</th>
                     <th>Store</th>
                     <th>Price</th>
+                    <th>Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1303,6 +1336,36 @@ function CatalogDashboard() {
                         </td>
                         <td>{storeCell}</td>
                         <td>{priceCell}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert("Cannot delete this motherboard because it has no ID.");
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this motherboard from the catalog?\n\n${p.name ?? p.id}`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setMotherboards((prev) => prev.filter((item) => item.id !== p.id));
+                              } catch (err) {
+                                console.error("Failed to delete motherboard", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this motherboard. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -1442,6 +1505,7 @@ function CatalogDashboard() {
                     <th>Socket</th>
                     <th>Store</th>
                     <th>Price</th>
+                    <th>Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1521,6 +1585,36 @@ function CatalogDashboard() {
                           )}
                         </td>
                         <td>{bestPrice != null ? formatMoney(bestPrice) : "—"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert("Cannot delete this cooler because it has no ID.");
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this cooler from the catalog?\n\n${p.name ?? p.id}`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setCoolers((prev) => prev.filter((item) => item.id !== p.id));
+                              } catch (err) {
+                                console.error("Failed to delete cooler", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this cooler. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
