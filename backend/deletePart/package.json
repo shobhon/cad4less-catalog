@@ -1,0 +1,10 @@
+{
+  "name": "delete-part",
+  "version": "1.0.0",
+  "description": "Lambda for deleting a CAD4Less part from DynamoDB",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1530.0"
+  }
+}
