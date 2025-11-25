@@ -16,24 +16,49 @@ export function formatMoney(value: number): string {
  * or any vendorList entries.
  */
 export function getBestPrice(p: Part): number | null {
-  if (typeof (p as any).price === "number") {
-    return (p as any).price;
-  }
+  const rawTopLevelPrice = (p as any).price;
+
+  const parsedTopLevelPrice =
+    typeof rawTopLevelPrice === "number"
+      ? rawTopLevelPrice
+      : typeof rawTopLevelPrice === "string"
+      ? Number(rawTopLevelPrice.replace(/[^0-9.]/g, ""))
+      : NaN;
 
   const vendorList = (p as any).vendorList;
+  const vendorPrices: number[] = [];
+
   if (Array.isArray(vendorList)) {
-    const candidates = vendorList.filter(
-      (v: any) => typeof v?.price === "number"
-    );
-    if (candidates.length > 0) {
-      return candidates.reduce(
-        (acc: number, v: any) => (v.price < acc ? v.price : acc),
-        candidates[0].price as number
-      );
+    for (const v of vendorList) {
+      const raw = v?.price;
+      const parsed =
+        typeof raw === "number"
+          ? raw
+          : typeof raw === "string"
+          ? Number(String(raw).replace(/[^0-9.]/g, ""))
+          : NaN;
+      if (!Number.isNaN(parsed)) {
+        vendorPrices.push(parsed);
+      }
     }
   }
 
-  return null;
+  const candidates: number[] = [];
+
+  if (!Number.isNaN(parsedTopLevelPrice)) {
+    candidates.push(parsedTopLevelPrice);
+  }
+
+  candidates.push(...vendorPrices);
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return candidates.reduce(
+    (min, value) => (value < min ? value : min),
+    candidates[0]
+  );
 }
 
 /**

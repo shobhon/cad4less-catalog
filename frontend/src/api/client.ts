@@ -1,4 +1,16 @@
-import { API_BASE } from "./parts";
+
+import { API_BASE as PARTS_API_BASE } from "./parts";
+
+const API_BASE =
+  import.meta.env.VITE_API_BASE ??
+  PARTS_API_BASE ??
+  "https://lhr6ymi61h.execute-api.us-west-1.amazonaws.com/v1";
+
+// Debug: log the API base in development so we can verify which backend is used
+if (typeof import.meta !== "undefined" && (import.meta as any).env?.DEV) {
+  // eslint-disable-next-line no-console
+  console.log("CAD4Less API_BASE (client.ts):", API_BASE);
+}
 
 // LocalStorage-based persistence for "Use in builds" state
 const LOCAL_IN_BUILDS_KEY = "cad4less_inBuilds_v1";
@@ -57,7 +69,20 @@ function setLocalInBuilds(id: string, category: Category, inBuilds: boolean): vo
   saveLocalInBuilds(Array.from(map.values()));
 }
 
-export type Category = "cpu" | "motherboard" | "cpu-cooler";
+export type Category =
+  | "cpu"
+  | "cpu-cooler"
+  | "motherboard"
+  | "memory"
+  | "storage"
+  | "video-card"
+  | "case"
+  | "power-supply"
+  | "operating-system"
+  | "monitor"
+  | "expansion-cards-networking"
+  | "peripherals"
+  | "accessories-other";
 
 export interface VendorOffer {
   vendor: string;
@@ -244,5 +269,7 @@ export async function importPartsFromCsv(
     );
   }
 
-  return (await res.json()) as ImportCsvResult;
+  const json = (await res.json()) as ImportCsvResult;
+  console.log("CSV import /parts/import-csv raw response:", json);
+  return json;
 }

@@ -30,8 +30,9 @@ export interface PartsResponse {
 
 // 🔹 Export API_BASE so all API helpers (including Add Parts) can share it
 export const API_BASE =
+  import.meta.env.VITE_API_BASE ??
   import.meta.env.VITE_API_BASE_URL ??
-  "https://i5txnpsovh.execute-api.us-west-1.amazonaws.com/Stage"
+  "https://lhr6ymi61h.execute-api.us-west-1.amazonaws.com/v1"
 
 // 🔹 Shared helper for consistent error handling and nicer messages
 async function handleJsonResponse<T>(

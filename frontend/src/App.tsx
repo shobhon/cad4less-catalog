@@ -1608,7 +1608,7 @@ const AddPartsTab: React.FC = () => {
       const skippedNotInStock = (result as any)?.skippedNotInStock ?? 0;
       const message = (result as any)?.message as string | undefined;
 
-      const summary = `CSV import completed for "${category}": ${succeeded}/${attempted} succeeded, ${failed} failed, ${skippedNotInStock} skipped (not in stock).`;
+      const summary = `CSV import completed: ${succeeded}/${attempted} succeeded, ${failed} failed, ${skippedNotInStock} skipped (not in stock).`;
 
       setStatus(message ? `${summary} Message: ${message}` : summary);
     } catch (err: any) {
@@ -1640,35 +1640,6 @@ const AddPartsTab: React.FC = () => {
           className="toolbar"
           style={{ marginBottom: 16, alignItems: "flex-start" }}
         >
-          {/* Category selection */}
-          <div className="toolbar-group">
-            <label className="toolbar-label" htmlFor="csv-category">
-              Category
-            </label>
-            <select
-              id="csv-category"
-              className="toolbar-select"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as ApifyCategory)}
-            >
-              <option value="cpu">CPU</option>
-              <option value="cpu-cooler">CPU Cooler</option>
-              <option value="motherboard">Motherboard</option>
-              <option value="memory">Memory</option>
-              <option value="storage">Storage</option>
-              <option value="video-card">Video Card</option>
-              <option value="case">Case</option>
-              <option value="power-supply">Power Supply</option>
-              <option value="operating-system">Operating System</option>
-              <option value="monitor">Monitor</option>
-              <option value="expansion-cards-networking">
-                Expansion Cards / Networking
-              </option>
-              <option value="peripherals">Peripherals</option>
-              <option value="accessories-other">Accessories / Other</option>
-            </select>
-          </div>
-
           {/* CSV text area + file upload */}
           <div className="toolbar-group toolbar-group--grow">
             <label className="toolbar-label" htmlFor="csv-text">

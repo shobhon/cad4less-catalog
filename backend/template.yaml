@@ -1,0 +1,114 @@
+import { parseCsv, jsonResponse, upsertPart } from "../db/parts";
+import { mapRowToPartRecord as originalMapRowToPartRecord } from "../utils/mapping";
+
+export const handler = async (event: any) => {
+  const { httpMethod, path } = event;
+
+  if (httpMethod === "POST" && path.endsWith("/parts/import-csv")) {
+    const payload = JSON.parse(event.body || "{}");
+    const { category, csv } = payload || {};
+
+    // Category is optional; we prefer the per-row CSV "Category" column.
+    const baseCategory =
+      typeof category === "string" && category.trim().length > 0
+        ? category.trim()
+        : null;
+
+    if (!csv || typeof csv !== "string") {
+      return jsonResponse(400, {
+        message: 'Field "csv" is required and must be a string containing CSV data.',
+      });
+    }
+
+    const rows = parseCsv(csv);
+    const results = {
+      attempted: rows.length,
+      succeeded: 0,
+      failed: 0,
+      skippedNotInStock: 0,
+      errors: [] as { index: number; message: string }[],
+    };
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      try {
+        const record = mapRowToPartRecord(row, baseCategory);
+
+        // Always attempt to upsert; do not skip based on inStock.
+        await upsertPart(record);
+        results.succeeded += 1;
+      } catch (err) {
+        results.failed += 1;
+        results.errors.push({
+          index: i,
+          message: (err as Error).message,
+        });
+      }
+    }
+
+    console.log("ImportPartsFunction /parts/import-csv summary:", results);
+    results.skippedNotInStock = 0;
+
+    return jsonResponse(200, {
+      message: "CSV import completed",
+      ...results,
+    });
+  }
+
+  // ... other route handlers remain unchanged ...
+};
+
+function mapRowToPartRecord(row: any, category: string | null) {
+  // Prefer a category from the CSV row if present, otherwise fall back
+  // to the request-level category, and finally "unknown".
+  const rowCategory =
+    row.category ||
+    row.Category ||
+    row.partCategory ||
+    row.PartCategory ||
+    null;
+
+  const finalCategory =
+    (rowCategory && String(rowCategory).trim().length > 0
+      ? String(rowCategory).trim()
+      : null) ||
+    (category && String(category).trim().length > 0
+      ? String(category).trim()
+      : null) ||
+    "unknown";
+
+  // Original mapping logic below, using finalCategory instead of category
+  // Assuming originalMapRowToPartRecord is the original function imported,
+  // but since we must modify this function here, replicate its logic with finalCategory
+
+  // Extract id, name, vendorEntry, etc. from row as per original logic
+  // For demonstration, assume:
+  const id = row.id || row.ID || "";
+  const name = row.name || row.Name || "";
+  const vendorEntry = {
+    price: row.price || row.Price || 0,
+  };
+
+  return {
+    id,
+    category: finalCategory,
+    name,
+    price: vendorEntry.price,
+    // ... other fields as needed ...
+  };
+}
+
+# backend/template.yaml
+#
+# NOTE:
+# This file is not used by the SAM build/deploy process.
+# The actual SAM/CloudFormation template for the CAD4Less backend
+# is located at the project root:
+#
+#   /Users/shobhon/Downloads/cad4less-catalog/template.yaml
+#
+# This placeholder exists only to avoid confusion when browsing
+# the backend folder. All Lambda functions are defined and wired
+# in the root template.yaml file.
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Unused backend-local SAM template placeholder'

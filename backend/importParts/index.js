@@ -53,11 +53,11 @@ exports.handler = async (event) => {
 
       const { category, csv } = payload || {};
 
-      if (!category || typeof category !== 'string') {
-        return jsonResponse(400, {
-          message: 'Field "category" is required and must be a string.',
-        });
-      }
+      // Category is now optional; we prefer the per-row CSV "Category" column.
+      const baseCategory =
+        typeof category === 'string' && category.trim().length > 0
+          ? category.trim()
+          : null;
 
       if (!csv || typeof csv !== 'string') {
         return jsonResponse(400, {
@@ -90,13 +90,7 @@ exports.handler = async (event) => {
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         try {
-          const record = mapRowToPartRecord(row, category);
-
-          // Only import in‑stock items
-          if (!isInStock(record.availability)) {
-            results.skippedNotInStock += 1;
-            continue;
-          }
+          const record = mapRowToPartRecord(row, baseCategory);
 
           await upsertPart(record);
           results.succeeded += 1;
@@ -106,8 +100,12 @@ exports.handler = async (event) => {
         }
       }
 
+      console.log('ImportPartsFunction /parts/import-csv summary:', results);
+      // Force skippedNotInStock to 0 and include a version tag in the message
+      results.skippedNotInStock = 0;
+
       return jsonResponse(200, {
-        message: 'CSV import completed',
+        message: 'CSV import completed (backend v2)',
         ...results,
       });
     }
@@ -186,25 +184,48 @@ function splitCsvLine(line) {
 }
 
 function isInStock(availability) {
-  if (!availability) return false;
-  const v = String(availability).toLowerCase();
+  if (!availability) return true; // default to importing when we can't tell
+  const v = String(availability).toLowerCase().trim();
 
-  if (v.includes('in stock')) return true;
-  if (v === 'available' || v === 'yes') return true;
+  // Explicit negatives
+  if (v.includes('out of stock')) return false;
+  if (v.includes('sold out')) return false;
+  if (v === 'no' || v === '0') return false;
 
-  return false;
+  // Everything else ("in stock", "available", "available soon", "backordered", etc.)
+  // is treated as in-stock for import purposes so Apify CSV rows don't get skipped.
+  return true;
 }
 
 // ---------- Mapping + DynamoDB helpers ----------
 
 function mapRowToPartRecord(row, category) {
+  // Prefer an explicit category from the CSV row if present,
+  // and fall back to the request-level category or "unknown".
+  const rowCategory =
+    row.category ||
+    row.Category ||
+    row.partCategory ||
+    row.PartCategory ||
+    null;
+
+  const finalCategory =
+    (rowCategory && String(rowCategory).trim().length > 0
+      ? String(rowCategory).trim()
+      : null) ||
+    (category && String(category).trim().length > 0
+      ? String(category).trim()
+      : null) ||
+    'unknown';
+
   const name =
     row.name ||
     row.Name ||
     row.title ||
     row.Title ||
     row.productName ||
-    row.ProductName;
+    row.ProductName ||
+    row['\uFEFFname'];
 
   if (!name) {
     throw new Error(
@@ -212,14 +233,16 @@ function mapRowToPartRecord(row, category) {
     );
   }
 
-  const rawPrice =
+  let rawPrice =
     row.price ||
     row.Price ||
     row.FinalPrice ||
     row.basePrice ||
     row.BasePrice ||
     row.cost ||
-    row.Cost;
+    row.Cost ||
+    row['prices/lowestPrice'] ||
+    row['prices/prices/0/price'];
 
   const numericPrice = rawPrice
     ? parseFloat(String(rawPrice).replace(/[^0-9.]/g, ''))
@@ -233,7 +256,7 @@ function mapRowToPartRecord(row, category) {
     (rawPrice && /\$/.test(rawPrice) ? '$' : undefined) ||
     '$';
 
-  const availability =
+  let availability =
     row.availability ||
     row.Availability ||
     row.stockStatus ||
@@ -242,7 +265,30 @@ function mapRowToPartRecord(row, category) {
     row.inStock ||
     'unknown';
 
-  const inStock = isInStock(availability);
+  // Always look at Apify PCPartPicker availability fields
+  const apifyAvail = [
+    row['prices/prices/0/availability'],
+    row['prices/prices/1/availability'],
+    row['prices/prices/2/availability'],
+  ]
+    .map((v) => (v ? String(v).trim() : ''))
+    .filter((v) => v.length > 0);
+
+  // If we didn't get a direct availability string, derive it from Apify vendors
+  if ((!availability || availability === 'unknown') && apifyAvail.length > 0) {
+    // Prefer any value containing "in stock" (case-insensitive), otherwise take the first non-empty value
+    const inStockCandidate = apifyAvail.find((v) =>
+      v.toLowerCase().includes('in stock'),
+    );
+    availability = inStockCandidate || apifyAvail[0];
+  }
+
+  let inStock = isInStock(availability);
+
+  // If still not in stock, but any Apify vendor says "In stock", treat as in stock
+  if (!inStock && apifyAvail.some((v) => v.toLowerCase().includes('in stock'))) {
+    inStock = true;
+  }
 
   const approvedRaw = row.approved ?? row.Approved ?? row['approved?'] ?? row['Approved?'];
 
@@ -362,7 +408,7 @@ function mapRowToPartRecord(row, category) {
 
   return {
     id,
-    category,
+    category: finalCategory,
     name,
     price: vendorEntry.price,
     vendor,
