@@ -1,0 +1,144 @@
+// frontend/src/api/client.ts
+// Central API client for CAD4Less admin frontend
+
+export interface Part {
+  id: string;
+  name: string;
+  category: string;
+  approved?: boolean;
+  prices?: any;
+  // Allow arbitrary extra fields from the backend (specs, ratings, etc.)
+  [key: string]: any;
+}
+
+const DEFAULT_API_BASE =
+  "https://lhr6ymi61h.execute-api.us-west-1.amazonaws.com/v1";
+
+export const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE || DEFAULT_API_BASE;
+
+console.log("CAD4Less API_BASE (client.ts):", API_BASE);
+
+async function fetchJson<T = any>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
+  console.log("CAD4Less fetchJson:", options.method || "GET", url);
+
+  const response = await fetch(url, {
+    ...options,
+  });
+
+  let rawBody: string | null = null;
+
+  if (!response.ok) {
+    try {
+      rawBody = await response.text();
+    } catch {
+      rawBody = null;
+    }
+    console.error("CAD4Less API error", {
+      status: response.status,
+      statusText: response.statusText,
+      body: rawBody,
+    });
+
+    // Try to surface any message from JSON error payloads
+    if (rawBody) {
+      try {
+        const parsed = JSON.parse(rawBody);
+        if (parsed && typeof parsed.message === "string") {
+          throw new Error(parsed.message);
+        }
+      } catch {
+        // ignore JSON parse errors, fall through
+      }
+    }
+
+    throw new Error(
+      rawBody || `Request failed with status ${response.status}`
+    );
+  }
+
+  if (response.status === 204) {
+    // No content
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return (await response.json()) as T;
+  }
+
+  // Fallback: try to parse as JSON, otherwise return text
+  const text = await response.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Parts APIs
+// -----------------------------------------------------------------------------
+
+export async function fetchParts(): Promise<Part[]> {
+  const data = await fetchJson<any>(`${API_BASE}/parts`);
+
+  if (Array.isArray(data)) {
+    return data as Part[];
+  }
+  if (data && Array.isArray((data as any).items)) {
+    return (data as any).items as Part[];
+  }
+  if (data && Array.isArray((data as any).parts)) {
+    return (data as any).parts as Part[];
+  }
+
+  console.warn("fetchParts: unexpected response shape, returning []", data);
+  return [];
+}
+
+export async function updatePartApproved(
+  id: string,
+  approved: boolean
+): Promise<any> {
+  return fetchJson(`${API_BASE}/parts/approved`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id, approved }),
+  });
+}
+
+// Trigger an Apify import for a given part category
+export async function runApifyImport(category: string): Promise<any> {
+  return fetchJson(`${API_BASE}/parts/import/apify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ category }),
+  });
+}
+
+// Import parts from a CSV pasted/uploaded in the UI
+export async function importPartsFromCsv(
+  category: string,
+  csvText: string
+): Promise<any> {
+  // We send JSON in the body, but use a CORS-simple Content-Type so the
+  // browser does NOT trigger a preflight. The Lambda still sees a JSON
+  // string in event.body and can JSON.parse it as usual.
+  const payload = { category, csvText };
+
+  return fetchJson(`${API_BASE}/parts/import/csv`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=UTF-8",
+    },
+    body: JSON.stringify(payload),
+  });
+}

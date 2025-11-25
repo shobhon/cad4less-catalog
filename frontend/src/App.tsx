@@ -652,7 +652,33 @@ function CatalogDashboard() {
   const [coolerSortKey, setCoolerSortKey] = useState<SortKey>("name-asc");
   const [coolerPage, setCoolerPage] = useState(1);
 
+  // ---- Memory catalog state ----
+  const [memoryParts, setMemoryParts] = useState<Part[]>([]);
+  const [loadingMemory, setLoadingMemory] = useState(false);
+  const [memoryError, setMemoryError] = useState<string | null>(null);
+  const [memorySearch, setMemorySearch] = useState("");
+  const [memoryStoreFilter, setMemoryStoreFilter] = useState<string>("all");
+  const [memorySortKey, setMemorySortKey] = useState<SortKey>("name-asc");
+  const [memoryPage, setMemoryPage] = useState(1);
+
   // ---- Compatibility filter state ----
+  const loadMemory = React.useCallback(async () => {
+    try {
+      setLoadingMemory(true);
+      setMemoryError(null);
+      const data = await fetchParts("memory" as any, "all");
+      setMemoryParts(data.parts ?? []);
+      setMemoryPage(1);
+    } catch (err: any) {
+      console.error("Failed to fetch memory parts", err);
+      setMemoryError(err?.message ?? "Failed to fetch memory parts");
+    } finally {
+      setLoadingMemory(false);
+    }
+  }, []);
+  useEffect(() => {
+    void loadMemory();
+  }, [loadMemory]);
   const [activeSocket, setActiveSocket] = useState<string | null>(null);
   const [activeSocketLabel, setActiveSocketLabel] = useState<string | null>(null);
   const [activeSocketKeys, setActiveSocketKeys] = useState<string[]>([]);
@@ -824,8 +850,27 @@ function CatalogDashboard() {
     coolerStart,
     coolerStart + PAGE_SIZE
   );
+  // ---- Memory derived lists ----
+  const memoryLive = React.useMemo(() => memoryParts, [memoryParts]);
+  const memoryStores = ["all", ...getStoreOptions(memoryLive)];
+  const memoryProcessed = applyFiltersAndSorting(
+    memoryLive,
+    memorySearch,
+    memoryStoreFilter,
+    memorySortKey,
+    { requirePrice: true, socketFilterKeys: [] }
+  );
+  const memoryTotal = memoryLive.length;
+  const memoryMatching = memoryProcessed.sorted.length;
+  const memoryPageCount = Math.max(1, Math.ceil(memoryMatching / PAGE_SIZE));
+  const memoryPageClamped = Math.min(memoryPage, memoryPageCount);
+  const memoryStart = (memoryPageClamped - 1) * PAGE_SIZE;
+  const memoryPageItems = memoryProcessed.sorted.slice(
+    memoryStart,
+    memoryStart + PAGE_SIZE
+  );
 
-  const totalParts = cpuTotal + mbTotal + coolerTotal;
+  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal;
 
   return (
     <>
@@ -834,9 +879,9 @@ function CatalogDashboard() {
         <header className="panel-header">
           <h2>Select Parts for PC Builds</h2>
           <p className="panel-subtitle">
-            Operations dashboard for CPUs, motherboards, and CPU coolers. Use the
-            &quot;Use in builds&quot; column to choose which parts are eligible for
-            CAD4Less custom PC builds.
+            Operations dashboard for CPUs, motherboards, CPU coolers, memory, and other
+            PC components. Use the &quot;Use in builds&quot; column to choose which
+            parts are eligible for CAD4Less custom PC builds.
           </p>
         </header>
         <div className="table-meta" style={{ marginTop: "10px" }}>
@@ -844,6 +889,7 @@ function CatalogDashboard() {
           <span>CPUs: {cpuTotal}</span>
           <span>Motherboards: {mbTotal}</span>
           <span>CPU coolers: {coolerTotal}</span>
+          <span>Memory / RAM: {memoryTotal}</span>
         </div>
         {activeSocket && (
           <div className="compat-banner">
@@ -1641,6 +1687,240 @@ function CatalogDashboard() {
                   setCoolerPage((prev) => Math.min(prev + 1, coolerPageCount))
                 }
                 disabled={coolerPageClamped >= coolerPageCount}
+              >
+                Next page
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* 4. Memory / RAM Catalog */}
+      <section className="panel panel--catalog">
+        <header className="panel-header">
+          <h2>4. Memory / RAM Catalog (Live Data)</h2>
+          <p className="panel-subtitle">
+            Review all memory modules currently available in your catalog. Turn on{" "}
+            <strong>&quot;Use in builds&quot;</strong> for RAM kits you want to include
+            in CAD4Less PC builds.
+          </p>
+        </header>
+
+        <div className="toolbar">
+          <div className="toolbar-group">
+            <label className="toolbar-label">Store filter</label>
+            <select
+              className="toolbar-select"
+              value={memoryStoreFilter}
+              onChange={(e) => {
+                setMemoryStoreFilter(e.target.value);
+                setMemoryPage(1);
+              }}
+            >
+              {memoryStores.map((s) => (
+                <option key={s} value={s}>
+                  {s === "all" ? "All stores" : s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label">Search by name / ID</label>
+            <input
+              className="toolbar-input"
+              type="text"
+              placeholder="e.g. 32GB, DDR5, 6000"
+              value={memorySearch}
+              onChange={(e) => {
+                setMemorySearch(e.target.value);
+                setMemoryPage(1);
+              }}
+            />
+          </div>
+
+          <div className="toolbar-group">
+            <label className="toolbar-label">Sort by</label>
+            <select
+              className="toolbar-select"
+              value={memorySortKey}
+              onChange={(e) => {
+                setMemorySortKey(e.target.value as SortKey);
+                setMemoryPage(1);
+              }}
+            >
+              <option value="name-asc">Name (A → Z)</option>
+              <option value="price-asc">Price (low → high)</option>
+              <option value="price-desc">Price (high → low)</option>
+            </select>
+          </div>
+
+          <div className="toolbar-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void loadMemory()}
+              disabled={loadingMemory}
+            >
+              {loadingMemory ? "Refreshing…" : "Reload list"}
+            </button>
+          </div>
+        </div>
+
+        <div className="table-meta">
+          <span>Memory modules in catalog: {memoryTotal}</span>
+          <span>Matching filters: {memoryMatching}</span>
+          <span>
+            Showing: {memoryPageItems.length} of {memoryMatching} (page{" "}
+            {memoryPageClamped} / {memoryPageCount})
+          </span>
+        </div>
+
+        {memoryError && <div className="alert alert-error">{memoryError}</div>}
+
+        {loadingMemory ? (
+          <div className="table-loading">Loading memory modules…</div>
+        ) : memoryMatching === 0 ? (
+          <div className="table-empty">
+            No memory modules match the current filters. Adjust the filters above or run
+            the memory import job in the backend to refresh the list.
+          </div>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th className="use-in-builds-col">Use in builds</th>
+                    <th>Memory module</th>
+                    <th>Store</th>
+                    <th>Price</th>
+                    <th>Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {memoryPageItems.map((p) => {
+                    const bestPrice = getBestPrice(p);
+                    const { label: storeLabel, url: storeUrl } = getPrimaryOffer(p);
+
+                    return (
+                      <tr key={p.id ?? p.name} className="clickable-row">
+                        <td
+                          className="use-in-builds-cell"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!p.approved}
+                            onChange={async (e) => {
+                              const next = e.target.checked;
+                              setMemoryParts((prev) =>
+                                prev.map((item) =>
+                                  item.id === p.id ? { ...item, approved: next } : item
+                                )
+                              );
+                              try {
+                                await updatePartApproved(p.id as string, "memory", next);
+                              } catch (err) {
+                                console.error("Failed to update memory approval", err);
+                                setMemoryParts((prev) =>
+                                  prev.map((item) =>
+                                    item.id === p.id ? { ...item, approved: !next } : item
+                                  )
+                                );
+                                alert("Failed to save selection for this memory module.");
+                              }
+                            }}
+                          />
+                        </td>
+                        <td className="cell-main">
+                          <div className="cell-title">{p.name}</div>
+                          {p.productLink && (
+                            <a
+                              href={p.productLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {p.productLink}
+                            </a>
+                          )}
+                        </td>
+                        <td>
+                          {storeUrl ? (
+                            <a
+                              href={storeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {storeLabel}
+                            </a>
+                          ) : (
+                            storeLabel || "—"
+                          )}
+                        </td>
+                        <td>{bestPrice != null ? formatMoney(bestPrice) : "—"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert("Cannot delete this memory module because it has no ID.");
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this memory module from the catalog?\n\n${p.name ?? p.id}`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setMemoryParts((prev) =>
+                                  prev.filter((item) => item.id !== p.id)
+                                );
+                              } catch (err) {
+                                console.error("Failed to delete memory module", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this memory module. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pagination">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setMemoryPage((prev) => Math.max(1, prev - 1))}
+                disabled={memoryPageClamped <= 1}
+              >
+                Previous page
+              </button>
+              <span className="pagination-info">
+                Page {memoryPageClamped} of {memoryPageCount}
+              </span>
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  setMemoryPage((prev) => Math.min(prev + 1, memoryPageCount))
+                }
+                disabled={memoryPageClamped >= memoryPageCount}
               >
                 Next page
               </button>

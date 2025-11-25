@@ -23,7 +23,7 @@ export type PartCategory =
 // Base URL for the backend API. Prefer VITE_API_BASE if provided.
 const RAW_API_BASE: string =
   (import.meta as any).env?.VITE_API_BASE ||
-  "https://lhr6ymi6ih.execute-api.us-west-1.amazonaws.com/v1";
+  "https://lhr6ymi61h.execute-api.us-west-1.amazonaws.com/v1";
 
 export const API_BASE: string = RAW_API_BASE.replace(/\/+$/, "");
 
@@ -31,13 +31,18 @@ export const API_BASE: string = RAW_API_BASE.replace(/\/+$/, "");
 // eslint-disable-next-line no-console
 console.log("CAD4Less API_BASE (client.ts):", API_BASE);
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+async function fetchJson<T>(url: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers || undefined);
+
+  // If the caller did not specify a Content-Type and is sending a body,
+  // default to JSON. This allows callers to override Content-Type when needed.
+  if (!headers.has("Content-Type") && init.body !== undefined) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const response = await fetch(url, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init && init.headers ? init.headers : {}),
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -108,10 +113,9 @@ export async function updatePartApproved(
 export async function runApifyImport(
   category: PartCategory
 ): Promise<unknown> {
-  const url = `${API_BASE}/apify/import`;
+  const url = `${API_BASE}/imports/apify/${encodeURIComponent(category)}`;
   return fetchJson(url, {
     method: "POST",
-    body: JSON.stringify({ category }),
   });
 }
 
@@ -121,12 +125,19 @@ export async function runApifyImport(
  */
 export async function importPartsFromCsv(
   category: PartCategory,
-  csv: string
+  csvText: string
 ): Promise<unknown> {
-  const url = `${API_BASE}/parts/import/csv`;
+  const url = `${API_BASE}/parts/import-csv`;
+  const payload = { category, csv: csvText };
+
   return fetchJson(url, {
     method: "POST",
-    body: JSON.stringify({ category, csv }),
+    headers: {
+      // Use a CORS-simple Content-Type to avoid preflight,
+      // while still sending JSON in the body that the Lambda can parse.
+      "Content-Type": "text/plain;charset=UTF-8",
+    },
+    body: JSON.stringify(payload),
   });
 }
 
