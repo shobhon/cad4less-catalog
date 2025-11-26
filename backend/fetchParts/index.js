@@ -82,6 +82,25 @@ async function getLivePartsFromDynamo(category) {
     }
   }
 
+  // If we didn't find any items via category-specific scans, fall back to a
+  // full table scan and then filter in-memory. This is more expensive but
+  // ensures we still return data when category spellings/casing differ.
+  if (!allItems.length) {
+    console.log(
+      "No items found via category scans; falling back to full table scan for normalized category",
+      normalized
+    );
+
+    const fullScanResult = await ddb.send(
+      new ScanCommand({
+        TableName: TABLE_NAME,
+      })
+    );
+
+    const fullItems = fullScanResult.Items || [];
+    allItems = allItems.concat(fullItems);
+  }
+
   // Final in-memory filter to ensure we only return items that logically
   // belong to the requested category (case-insensitive match, treating
   // dashes/underscores and spaces equivalently).

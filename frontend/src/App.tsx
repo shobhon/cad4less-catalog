@@ -79,8 +79,18 @@ function getBestPrice(p: Part): number | null {
   // Try the original helper first, in case it already knows the schema.
   try {
     const base = (baseGetBestPrice as any)?.(p);
+
+    // Old behavior: plain numeric best price
     if (typeof base === "number" && Number.isFinite(base)) {
       return base;
+    }
+
+    // New behavior: object result from utils.getBestPrice with a price field
+    if (base && typeof base === "object") {
+      const maybePrice = Number((base as any).price);
+      if (Number.isFinite(maybePrice) && maybePrice > 0) {
+        return maybePrice;
+      }
     }
   } catch {
     // ignore and fall back to manual logic
@@ -395,7 +405,12 @@ function getStoreLabel(p: Part): string {
   const isPlaceholder = (v?: string | null) => {
     if (!v) return true;
     const s = v.toLowerCase().trim();
-    return !s || s === "manual" || s === "unknown" || s === "other";
+    return (
+      !s ||
+      s === "manual" ||
+      s === "unknown" ||
+      s === "other"
+    );
   };
 
   let direct =
@@ -477,6 +492,20 @@ function getPrimaryOffer(p: Part): { label: string; url: string | null } {
   if (Array.isArray(anyPart.vendors)) vendorLists.push(...anyPart.vendors);
   if (Array.isArray(anyPart.offers)) vendorLists.push(...anyPart.offers);
 
+  // Helper for placeholder labels (for future use in this function)
+  const isPlaceholderLabel = (v?: string | null) => {
+    if (!v) return true;
+    const s = v.toLowerCase().trim();
+    return (
+      !s ||
+      s === "manual" ||
+      s === "unknown" ||
+      s === "other" ||
+      s === "pcpartpicker" ||
+      s === "pc part picker"
+    );
+  };
+
   if (label && label !== "unknown" && vendorLists.length) {
     const lowerLabel = label.toLowerCase().trim();
     const match = vendorLists.find((v) => {
@@ -527,11 +556,75 @@ function getPrimaryOffer(p: Part): { label: string; url: string | null } {
       null;
   }
 
+  // Fallback: if we still have a placeholder label or no URL, try the richer
+  // object returned by the shared utils.getBestPrice (baseGetBestPrice).
+  try {
+    const labelIsPlaceholder = isPlaceholderLabel(label);
+    const urlMissing = !url;
+
+    if ((labelIsPlaceholder || urlMissing) && typeof (baseGetBestPrice as any) === "function") {
+      const base = (baseGetBestPrice as any)(p);
+
+      if (base && typeof base === "object") {
+        const bestStore =
+          (base as any).store ??
+          (base as any).vendor ??
+          (base as any).storeLabel ??
+          (base as any).seller ??
+          (base as any).merchant;
+
+        const bestUrl =
+          (base as any).buyLink ??
+          (base as any).url ??
+          (base as any).link ??
+          null;
+
+        if (bestStore && !isPlaceholderLabel(bestStore)) {
+          label = String(bestStore).trim();
+        }
+
+        if (!url && typeof bestUrl === "string" && bestUrl.trim()) {
+          url = bestUrl.trim();
+        }
+      }
+    }
+  } catch {
+    // ignore and fall back to whatever label/url we already computed
+  }
+
   if (!label) {
     label = "unknown";
   }
 
   return { label, url };
+}
+
+type BestOffer = {
+  storeLabel: string;
+  storeUrl: string | null;
+  price: number | null;
+};
+
+/**
+ * Thin wrapper around the existing, proven helpers:
+ * - getBestPrice(p): numeric best price
+ * - getPrimaryOffer(p): best vendor label + direct URL
+ *
+ * This ensures Memory and Video Card catalogs use the same vendor/URL
+ * resolution logic as CPU, Motherboard, and Cooler catalogs.
+ */
+function getBestOfferForPart(p: Part): BestOffer {
+  const price = getBestPrice(p);
+  const { label, url } = getPrimaryOffer(p);
+
+  const safePrice =
+    typeof price === "number" && Number.isFinite(price) && price > 0 ? price : null;
+
+  return {
+    storeLabel: label || "unknown",
+    storeUrl: url,
+    price: safePrice,
+  };
 }
 
 function applyFiltersAndSorting(
@@ -1424,7 +1517,7 @@ function CatalogDashboard() {
                         rel="noreferrer"
                         className="cell-link"
                       >
-                        {isPcPartPickerStore ? "PCPartPicker (view offers)" : storeLabel}
+                        {isPcPartPickerStore ? "PCPartPicker" : storeLabel}
                       </a>
                     ) : (
                       storeLabel || "—"
@@ -1954,11 +2047,50 @@ function CatalogDashboard() {
                 </thead>
                 <tbody>
                   {memoryPageItems.map((p) => {
-                    const bestPrice = getBestPrice(p);
-                    const { label: storeLabel, url: storeUrl } = getPrimaryOffer(p);
+                    const { storeLabel, storeUrl, price } = getBestOfferForPart(p);
+
+                    const normalizedStore = (storeLabel || "")
+                      .toString()
+                      .toLowerCase()
+                      .trim();
+                    const isPcPartPickerStore =
+                      normalizedStore === "pcpartpicker" ||
+                      normalizedStore === "pc part picker";
+
+                    const storeCell = storeUrl ? (
+                      <a
+                        href={storeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="cell-link"
+                      >
+                        {isPcPartPickerStore
+                          ? "PCPartPicker"
+                          : storeLabel}
+                      </a>
+                    ) : (
+                      storeLabel || "—"
+                    );
+
+                    const priceCell: React.ReactNode =
+                      price != null && Number.isFinite(price) && price > 0
+                        ? formatMoney(price)
+                        : isPcPartPickerStore && storeUrl
+                        ? (
+                            <a
+                              href={storeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {"View price on PCPartPicker"}
+                            </a>
+                          )
+                        : "—";
 
                     return (
                       <tr key={p.id ?? p.name} className="clickable-row">
+                        {/* 1. Use in builds */}
                         <td
                           className="use-in-builds-cell"
                           onClick={(e) => {
@@ -1977,7 +2109,10 @@ function CatalogDashboard() {
                               );
                               const partId = p.id ? String(p.id) : null;
                               if (!partId) {
-                                console.warn("Skipping updatePartApproved for memory with no id", p);
+                                console.warn(
+                                  "Skipping updatePartApproved for memory with no id",
+                                  p
+                                );
                                 return;
                               }
                               console.log("Updating Memory approval", {
@@ -1991,14 +2126,20 @@ function CatalogDashboard() {
                                 console.error("Failed to update memory approval", err);
                                 setMemoryParts((prev) =>
                                   prev.map((item) =>
-                                    item.id === p.id ? { ...item, approved: !next } : item
+                                    item.id === p.id
+                                      ? { ...item, approved: !next }
+                                      : item
                                   )
                                 );
-                                alert("Failed to save selection for this memory module.");
+                                alert(
+                                  "Failed to save selection for this memory module."
+                                );
                               }
                             }}
                           />
                         </td>
+
+                        {/* 2. Memory module (name + link) */}
                         <td className="cell-main">
                           <div className="cell-title">{p.name}</div>
                           {p.productLink && (
@@ -2012,21 +2153,14 @@ function CatalogDashboard() {
                             </a>
                           )}
                         </td>
-                        <td>
-                          {storeUrl ? (
-                            <a
-                              href={storeUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="cell-link"
-                            >
-                              {storeLabel}
-                            </a>
-                          ) : (
-                            storeLabel || "—"
-                          )}
-                        </td>
-                        <td>{bestPrice != null ? formatMoney(bestPrice) : "—"}</td>
+
+                        {/* 3. Store */}
+                        <td>{storeCell}</td>
+
+                        {/* 4. Price */}
+                        <td>{priceCell}</td>
+
+                        {/* 5. Delete */}
                         <td>
                           <button
                             type="button"
@@ -2034,11 +2168,15 @@ function CatalogDashboard() {
                             onClick={async (e) => {
                               e.stopPropagation();
                               if (!p.id) {
-                                alert("Cannot delete this memory module because it has no ID.");
+                                alert(
+                                  "Cannot delete this memory module because it has no ID."
+                                );
                                 return;
                               }
                               const ok = window.confirm(
-                                `Delete this memory module from the catalog?\n\n${p.name ?? p.id}`
+                                `Delete this memory module from the catalog?\n\n${
+                                  p.name ?? p.id
+                                }`
                               );
                               if (!ok) return;
                               try {
@@ -2198,8 +2336,28 @@ function CatalogDashboard() {
                 </thead>
                 <tbody>
                   {videoCardPageItems.map((p) => {
-                    const bestPrice = getBestPrice(p);
-                    const { label: storeLabel, url: storeUrl } = getPrimaryOffer(p);
+                    const { storeLabel, storeUrl, price } = getBestOfferForPart(p);
+
+                    const normalizedStore = (storeLabel || "").toString().toLowerCase().trim();
+                    const isPcPartPickerStore = normalizedStore === "pcpartpicker" || normalizedStore === "pc part picker";
+
+                    const storeCell = storeUrl ? (
+                      <a
+                        href={storeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="cell-link"
+                      >
+                        {storeLabel}
+                      </a>
+                    ) : (
+                      storeLabel || "—"
+                    );
+
+                    const priceCell: React.ReactNode =
+                      price != null && Number.isFinite(price) && price > 0
+                        ? formatMoney(price)
+                        : "—";
 
                     return (
                       <tr key={p.id ?? p.name} className="clickable-row">
@@ -2263,21 +2421,10 @@ function CatalogDashboard() {
                             </a>
                           )}
                         </td>
-                        <td>
-                          {storeUrl ? (
-                            <a
-                              href={storeUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="cell-link"
-                            >
-                              {storeLabel}
-                            </a>
-                          ) : (
-                            storeLabel || "—"
-                          )}
-                        </td>
-                        <td>{bestPrice != null ? formatMoney(bestPrice) : "—"}</td>
+                        
+                        <td>{storeCell}</td>
+                        <td>{priceCell}</td>
+                        
                         <td>
                           <button
                             type="button"
