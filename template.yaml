@@ -13,7 +13,7 @@ Globals:
 Resources:
 
   #####################################################
-  # API Gateway
+  # API Gateway (REST API) with global CORS
   #####################################################
 
   ApiGateway:
@@ -26,7 +26,7 @@ Resources:
         AllowOrigin: "'*'"
 
   #####################################################
-  # Fetch Live Parts
+  # Fetch Live Parts from DynamoDB
   #####################################################
 
   FetchPartsFunction:
@@ -118,8 +118,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
-      CodeUri: backend/approvePart/
-      Runtime: nodejs18.x
+      CodeUri: backend/ApprovePart/
+      Runtime: nodejs16.x
       Environment:
         Variables:
           PARTS_TABLE_NAME: Cad4LessPartsLive
@@ -133,6 +133,12 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /parts/approved
             Method: POST
+        ApprovePartPreflight:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /parts/approved
+            Method: OPTIONS
 
   #####################################################
   # List Pending Parts
@@ -223,6 +229,32 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /builds/{buildId}
             Method: ANY
+
+  #####################################################
+  # API Gateway Default GatewayResponses with CORS
+  #####################################################
+
+  ApiGatewayResponseDefault4XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResponseType: DEFAULT_4XX
+      StatusCode: '400'
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+
+  ApiGatewayResponseDefault5XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResponseType: DEFAULT_5XX
+      StatusCode: '500'
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
 
 Outputs:
   ApiUrl:

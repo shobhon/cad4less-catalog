@@ -100,9 +100,16 @@ export async function updatePartApproved(
   approved: boolean
 ): Promise<void> {
   const url = `${API_BASE}/parts/approved`;
+  const payload = { id, category, approved };
+
   await fetchJson<void>(url, {
     method: "POST",
-    body: JSON.stringify({ id, category, approved }),
+    headers: {
+      // Use a CORS-simple Content-Type to avoid preflight,
+      // while still sending JSON in the body that the Lambda can parse.
+      "Content-Type": "text/plain;charset=UTF-8",
+    },
+    body: JSON.stringify(payload),
   });
 }
 

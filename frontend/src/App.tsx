@@ -1073,13 +1073,28 @@ function CatalogDashboard() {
                             checked={!!p.approved}
                             onChange={async (e) => {
                               const next = e.target.checked;
+
+                              // Optimistically update UI
                               setCpus((prev) =>
                                 prev.map((item) =>
                                   item.id === p.id ? { ...item, approved: next } : item
                                 )
                               );
+
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn("Skipping updatePartApproved for CPU with no id", p);
+                                return;
+                              }
+
+                              console.log("Updating CPU approval", {
+                                id: partId,
+                                category: "cpu",
+                                approved: next,
+                              });
+
                               try {
-                                await updatePartApproved(p.id as string, "cpu", next);
+                                await updatePartApproved(partId, "cpu", next);
                               } catch (err) {
                                 console.error("Failed to update CPU approval", err);
                                 setCpus((prev) =>
@@ -1360,14 +1375,28 @@ function CatalogDashboard() {
                             checked={!!p.approved}
                             onChange={async (e) => {
                               const next = e.target.checked;
+
                               setMotherboards((prev) =>
                                 prev.map((item) =>
                                   item.id === p.id ? { ...item, approved: next } : item
                                 )
                               );
+
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn("Skipping updatePartApproved for motherboard with no id", p);
+                                return;
+                              }
+
+                              console.log("Updating Motherboard approval", {
+                                id: partId,
+                                category: "motherboard",
+                                approved: next,
+                              });
+
                               try {
                                 await updatePartApproved(
-                                  p.id as string,
+                                  partId,
                                   "motherboard",
                                   next
                                 );
@@ -1598,14 +1627,28 @@ function CatalogDashboard() {
                             checked={!!p.approved}
                             onChange={async (e) => {
                               const next = e.target.checked;
+
                               setCoolers((prev) =>
                                 prev.map((item) =>
                                   item.id === p.id ? { ...item, approved: next } : item
                                 )
                               );
+
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn("Skipping updatePartApproved for cooler with no id", p);
+                                return;
+                              }
+
+                              console.log("Updating Cooler approval", {
+                                id: partId,
+                                category: "cpu-cooler",
+                                approved: next,
+                              });
+
                               try {
                                 await updatePartApproved(
-                                  p.id as string,
+                                  partId,
                                   "cpu-cooler",
                                   next
                                 );
@@ -1842,8 +1885,18 @@ function CatalogDashboard() {
                                   item.id === p.id ? { ...item, approved: next } : item
                                 )
                               );
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn("Skipping updatePartApproved for memory with no id", p);
+                                return;
+                              }
+                              console.log("Updating Memory approval", {
+                                id: partId,
+                                category: "memory",
+                                approved: next,
+                              });
                               try {
-                                await updatePartApproved(p.id as string, "memory", next);
+                                await updatePartApproved(partId, "memory", next);
                               } catch (err) {
                                 console.error("Failed to update memory approval", err);
                                 setMemoryParts((prev) =>
