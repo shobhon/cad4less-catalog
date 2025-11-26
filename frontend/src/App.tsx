@@ -783,7 +783,16 @@ function CatalogDashboard() {
   const [storageSortKey, setStorageSortKey] = useState<SortKey>("name-asc");
   const [storagePage, setStoragePage] = useState(1);
 
-  // ---- Compatibility filter state ----
+    // ---- Case catalog state ----
+  const [caseParts, setCaseParts] = useState<Part[]>([]);
+  const [loadingCases, setLoadingCases] = useState(false);
+  const [caseError, setCaseError] = useState<string | null>(null);
+  const [caseSearch, setCaseSearch] = useState("");
+  const [caseStoreFilter, setCaseStoreFilter] = useState<string>("all");
+  const [caseSortKey, setCaseSortKey] = useState<SortKey>("name-asc");
+  const [casePage, setCasePage] = useState(1);
+
+// ---- Compatibility filter state ----
   const loadMemory = React.useCallback(async () => {
     setLoadingMemory(true);
     setMemoryError(null);
@@ -929,6 +938,50 @@ function CatalogDashboard() {
   useEffect(() => {
     void loadVideoCards();
   }, [loadVideoCards]);
+
+  // ---- Case loader (effect) ----
+  const loadCases = React.useCallback(async () => {
+    setLoadingCases(true);
+    setCaseError(null);
+
+    try {
+      let data: any;
+
+      try {
+        data = await fetchParts("case" as any, "all");
+      } catch (err: any) {
+        const msg = String(err?.message ?? "");
+        if (msg.includes("No parts found for category 'case'")) {
+          console.warn(
+            "No parts found for category 'case' – falling back to 'Case'",
+            msg
+          );
+          data = await fetchParts("Case" as any, "all");
+        } else {
+          throw err;
+        }
+      }
+
+      setCaseParts(data.parts ?? []);
+      setCasePage(1);
+    } catch (err: any) {
+      const msg = String(err?.message ?? "");
+      if (msg.includes("No parts found for category")) {
+        console.warn("Case: no parts found, leaving list empty", msg);
+        setCaseParts([]);
+        setCaseError(null);
+      } else {
+        console.error("Failed to fetch case parts", err);
+        setCaseError(err?.message ?? "Failed to fetch case parts");
+      }
+    } finally {
+      setLoadingCases(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCases();
+  }, [loadCases]);
   const [activeSocket, setActiveSocket] = useState<string | null>(null);
   const [activeSocketLabel, setActiveSocketLabel] = useState<string | null>(null);
   const [activeSocketKeys, setActiveSocketKeys] = useState<string[]>([]);
@@ -1160,7 +1213,27 @@ function CatalogDashboard() {
     storageStart + PAGE_SIZE
   );
 
-  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal + storageTotal + videoCardTotal;
+  // ---- Case derived lists ----
+  const caseLive = React.useMemo(() => caseParts, [caseParts]);
+  const caseStores = ["all", ...getStoreOptions(caseLive)];
+  const caseProcessed = applyFiltersAndSorting(
+    caseLive,
+    caseSearch,
+    caseStoreFilter,
+    caseSortKey,
+    { requirePrice: false, socketFilterKeys: [], skipInStockCheck: true }
+  );
+  const caseTotal = caseLive.length;
+  const caseMatching = caseProcessed.sorted.length;
+  const casePageCount = Math.max(1, Math.ceil(caseMatching / PAGE_SIZE));
+  const casePageClamped = Math.min(casePage, casePageCount);
+  const caseStart = (casePageClamped - 1) * PAGE_SIZE;
+  const casePageItems = caseProcessed.sorted.slice(
+    caseStart,
+    caseStart + PAGE_SIZE
+  );
+
+  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal + storageTotal + videoCardTotal + caseTotal;
 
   return (
     <>
@@ -1182,6 +1255,7 @@ function CatalogDashboard() {
           <span>Memory / RAM: {memoryTotal}</span>
           <span>Storage (HDD / SSD): {storageTotal}</span>
           <span>Video cards: {videoCardTotal}</span>
+          <span>Cases: {caseTotal}</span>
         </div>
         {activeSocket && (
           <div className="compat-banner">
@@ -2883,6 +2957,280 @@ ${
           </>
         )}
       </section>
+      {/* 7. Case Catalog */}
+      <section className="panel panel--catalog">
+        <header className="panel-header">
+          <h2>7. Case Catalog</h2>
+          <p className="panel-subtitle">
+            Review all PC cases currently available in your catalog. Turn on{" "}
+            <strong>&quot;Use in builds&quot;</strong> for cases you want to include
+            in CAD4Less PC builds.
+          </p>
+        </header>
+
+        <div className="toolbar">
+          <div className="toolbar-group">
+            <label className="toolbar-label">Store filter</label>
+            <select
+              className="toolbar-select"
+              value={caseStoreFilter}
+              onChange={(e) => {
+                setCaseStoreFilter(e.target.value);
+                setCasePage(1);
+              }}
+            >
+              {caseStores.map((s) => (
+                <option key={s} value={s}>
+                  {s === "all" ? "All stores" : s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label">Search by name / ID</label>
+            <input
+              className="toolbar-input"
+              type="text"
+              placeholder="e.g. ATX, mini-ITX, Fractal"
+              value={caseSearch}
+              onChange={(e) => {
+                setCaseSearch(e.target.value);
+                setCasePage(1);
+              }}
+            />
+          </div>
+
+          <div className="toolbar-group">
+            <label className="toolbar-label">Sort by</label>
+            <select
+              className="toolbar-select"
+              value={caseSortKey}
+              onChange={(e) => {
+                setCaseSortKey(e.target.value as SortKey);
+                setCasePage(1);
+              }}
+            >
+              <option value="name-asc">Name (A → Z)</option>
+              <option value="price-asc">Price (low → high)</option>
+              <option value="price-desc">Price (high → low)</option>
+            </select>
+          </div>
+
+          <div className="toolbar-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void loadCases()}
+              disabled={loadingCases}
+            >
+              {loadingCases ? "Refreshing…" : "Reload list"}
+            </button>
+          </div>
+        </div>
+
+        <div className="table-meta">
+          <span>Cases in catalog: {caseTotal}</span>
+          <span>Matching filters: {caseMatching}</span>
+          <span>
+            Showing: {casePageItems.length} of {caseMatching} (page{" "}
+            {casePageClamped} / {casePageCount})
+          </span>
+        </div>
+
+        {caseError && <div className="alert alert-error">{caseError}</div>}
+
+        {loadingCases ? (
+          <div className="table-loading">Loading cases…</div>
+        ) : caseMatching === 0 ? (
+          <div className="table-empty">
+            No cases match the current filters. Adjust the filters above or run
+            the case import job in the backend to refresh the list.
+          </div>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th className="use-in-builds-col">Use in builds</th>
+                    <th>Case</th>
+                    <th>Store</th>
+                    <th>Price</th>
+                    <th>Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {casePageItems.map((p) => {
+                    const { storeLabel, storeUrl, price } = getBestOfferForPart(p);
+
+                    const normalizedStore = (storeLabel || "")
+                      .toString()
+                      .toLowerCase()
+                      .trim();
+                    const isPcPartPickerStore =
+                      normalizedStore === "pcpartpicker" ||
+                      normalizedStore === "pc part picker";
+
+                    const storeCell = storeUrl ? (
+                      <a
+                        href={storeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="cell-link"
+                      >
+                        {isPcPartPickerStore ? "PCPartPicker" : storeLabel}
+                      </a>
+                    ) : (
+                      storeLabel || "—"
+                    );
+
+                    const priceCell: React.ReactNode =
+                      price != null && Number.isFinite(price) && price > 0
+                        ? formatMoney(price)
+                        : isPcPartPickerStore && storeUrl
+                        ? (
+                            <a
+                              href={storeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {"View price on PCPartPicker"}
+                            </a>
+                          )
+                        : "—";
+
+                    return (
+                      <tr key={p.id ?? p.name} className="clickable-row">
+                        <td
+                          className="use-in-builds-cell"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!p.approved}
+                            onChange={async (e) => {
+                              const next = e.target.checked;
+                              setCaseParts((prev) =>
+                                prev.map((item) =>
+                                  item.id === p.id ? { ...item, approved: next } : item
+                                )
+                              );
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn(
+                                  "Skipping updatePartApproved for case with no id",
+                                  p
+                                );
+                                return;
+                              }
+                              console.log("Updating Case approval", {
+                                id: partId,
+                                category: "case",
+                                approved: next,
+                              });
+                              try {
+                                await updatePartApproved(partId, "case", next);
+                              } catch (err) {
+                                console.error("Failed to update case approval", err);
+                                setCaseParts((prev) =>
+                                  prev.map((item) =>
+                                    item.id === p.id
+                                      ? { ...item, approved: !next }
+                                      : item
+                                  )
+                                );
+                                alert("Failed to save selection for this case.");
+                              }
+                            }}
+                          />
+                        </td>
+                        <td className="cell-main">
+                          <div className="cell-title">{p.name}</div>
+                          {p.productLink && (
+                            <a
+                              href={p.productLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {p.productLink}
+                            </a>
+                          )}
+                        </td>
+                        <td>{storeCell}</td>
+                        <td>{priceCell}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert("Cannot delete this case because it has no ID.");
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this case from the catalog?\n\n${
+                                  p.name ?? p.id
+                                }`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setCaseParts((prev) =>
+                                  prev.filter((item) => item.id !== p.id)
+                                );
+                              } catch (err) {
+                                console.error("Failed to delete case", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this case. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pagination">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setCasePage((prev) => Math.max(1, prev - 1))}
+                disabled={casePageClamped <= 1}
+              >
+                Previous page
+              </button>
+              <span className="pagination-info">
+                Page {casePageClamped} of {casePageCount}
+              </span>
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  setCasePage((prev) => Math.min(prev + 1, casePageCount))
+                }
+                disabled={casePageClamped >= casePageCount}
+              >
+                Next page
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
     </>
   );
 }
