@@ -2567,7 +2567,31 @@ ${
                 </tbody>
           </table>
         </div>
-      </section>
+      
+
+            <div className="pagination">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setStoragePage((prev) => Math.max(1, prev - 1))}
+                disabled={storagePageClamped <= 1}
+              >
+                Previous page
+              </button>
+              <span className="pagination-info">
+                Page {storagePageClamped} of {storagePageCount}
+              </span>
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  setStoragePage((prev) => Math.min(prev + 1, storagePageCount))
+                }
+                disabled={storagePageClamped >= storagePageCount}
+              >
+                Next page
+              </button>
+            </div></section>
 
       {/* 6. Video Card Catalog */}
       <section className="panel panel--catalog">
@@ -2904,7 +2928,7 @@ const AddPartsTab: React.FC = () => {
     setStatus(null);
 
     try {
-      console.log("DEBUG importPartsFromCsv category", importCategory);
+      console.log("DEBUG importPartsFromCsv category", category);
 
       const result = await importPartsFromCsv(category as any, trimmed);
       console.log("CSV import result", result);

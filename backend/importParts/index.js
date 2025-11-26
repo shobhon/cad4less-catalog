@@ -22,12 +22,10 @@ exports.handler = async (event) => {
     const path = event && event.path ? event.path : '';
     const resource = event && event.resource ? event.resource : '';
 
-    // CORS preflight
     if (httpMethod === 'OPTIONS') {
       return jsonResponse(200, { message: 'OK' });
     }
 
-    // POST /parts/import-csv  (CSV → DynamoDB, no Apify)
     if (
       httpMethod === 'POST' &&
       (path.endsWith('/parts/import-csv') || resource === '/parts/import-csv')
@@ -53,7 +51,6 @@ exports.handler = async (event) => {
 
       const { category, csv } = payload || {};
 
-      // Category is now optional; we prefer the per-row CSV "Category" column.
       const baseCategory =
         typeof category === 'string' && category.trim().length > 0
           ? category.trim()
@@ -100,31 +97,25 @@ exports.handler = async (event) => {
         }
       }
 
-      // Normalize CSV import summary so we never report "skipped (not in stock)"
       if (Array.isArray(rows)) {
-        // Ensure attempted reflects the total number of parsed rows
         results.attempted = rows.length;
       }
 
-      // If failed is not a number, treat it as 0
       if (typeof results.failed !== 'number' || Number.isNaN(results.failed)) {
         results.failed = 0;
       }
 
-      // Compute succeeded as attempted - failed, and force skippedNotInStock to 0
       results.succeeded = Math.max(0, results.attempted - results.failed);
       results.skippedNotInStock = 0;
 
       console.log('ImportPartsFunction /parts/import-csv summary (normalized):', results);
 
-      // Note: the normalized summary log above already printed detailed results.
       return jsonResponse(200, {
         message: 'CSV import completed',
         ...results,
       });
     }
 
-    // Legacy GET /parts/import
     if (httpMethod === 'GET') {
       return jsonResponse(200, {
         message:
@@ -141,8 +132,6 @@ exports.handler = async (event) => {
     });
   }
 };
-
-// ---------- CSV helpers ----------
 
 function parseCsv(text) {
   const lines = text
@@ -180,22 +169,16 @@ function splitCsvLine(line) {
 
     if (ch === '"') {
       if (inQuotes) {
-        // Inside a quoted field
         if (line[i + 1] === '"') {
-          // Escaped quote ("")
           current += '"';
           i++;
         } else {
-          // Closing quote
           inQuotes = false;
         }
       } else {
-        // Not currently in quotes
         if (current === '') {
-          // Quote at the start of the field starts a quoted section
           inQuotes = true;
         } else {
-          // Quote in the middle of a field is treated as a literal character
           current += '"';
         }
       }
@@ -212,25 +195,19 @@ function splitCsvLine(line) {
 }
 
 function isInStock(availability) {
-  if (!availability) return true; // default to importing when we can't tell
+  if (!availability) return true;
   const v = String(availability).toLowerCase().trim();
 
-  // Explicit negatives
   if (v.includes('out of stock')) return false;
   if (v.includes('sold out')) return false;
   if (v === 'no' || v === '0') return false;
 
-  // Everything else ("in stock", "available", "available soon", "backordered", etc.)
-  // is treated as in-stock for import purposes so Apify CSV rows don't get skipped.
   return true;
 }
 
 function looksLikeStorageRow(row) {
   if (!row) return false;
 
-  // 1) Exact "scrape-storage.csv" signature:
-  // name,capacity,price_per_gb,type_or_rpm,cache,form_factor,
-  // interface,rating_count,availability,price
   const hasSignatureColumns =
     Object.prototype.hasOwnProperty.call(row, 'capacity') &&
     Object.prototype.hasOwnProperty.call(row, 'price_per_gb') &&
@@ -243,11 +220,9 @@ function looksLikeStorageRow(row) {
     Object.prototype.hasOwnProperty.call(row, 'price');
 
   if (hasSignatureColumns) {
-    // This is our hard-coded storage CSV format
     return true;
   }
 
-  // 2) Fallback heuristic for other storage-looking CSVs
   const hasCapacity = row.capacity || row.Capacity;
   const hasTypeOrRpm =
     row.type_or_rpm ||
@@ -266,21 +241,27 @@ function looksLikeStorageRow(row) {
     row.busInterface ||
     row.BusInterface;
 
-  // Treat rows that look like Storage (HDD/SSD) as storage when no category is provided.
   return !!(hasCapacity && (hasTypeOrRpm || hasFormFactor || hasInterface));
 }
 
-// ---------- Mapping + DynamoDB helpers ----------
-
 function mapRowToPartRecord(row, category) {
-  // Prefer an explicit category from the CSV row if present,
-  // and fall back to the request-level category or "unknown".
   const rowCategory =
     row.category ||
     row.Category ||
     row.partCategory ||
     row.PartCategory ||
     null;
+
+  const isSignatureStorageRow =
+    Object.prototype.hasOwnProperty.call(row, 'capacity') &&
+    Object.prototype.hasOwnProperty.call(row, 'price_per_gb') &&
+    Object.prototype.hasOwnProperty.call(row, 'type_or_rpm') &&
+    Object.prototype.hasOwnProperty.call(row, 'cache') &&
+    Object.prototype.hasOwnProperty.call(row, 'form_factor') &&
+    Object.prototype.hasOwnProperty.call(row, 'interface') &&
+    Object.prototype.hasOwnProperty.call(row, 'rating_count') &&
+    Object.prototype.hasOwnProperty.call(row, 'availability') &&
+    Object.prototype.hasOwnProperty.call(row, 'price');
 
   let finalCategory =
     (category && String(category).trim().length > 0
@@ -291,9 +272,9 @@ function mapRowToPartRecord(row, category) {
       : null) ||
     null;
 
-  // If neither the request nor the row provided a category, but the row clearly
-  // looks like a Storage (HDD/SSD) part, infer "storage" as the category.
-  if (!finalCategory && looksLikeStorageRow(row)) {
+  if (isSignatureStorageRow) {
+    finalCategory = 'storage';
+  } else if (!finalCategory && looksLikeStorageRow(row)) {
     finalCategory = 'storage';
   }
 
@@ -348,7 +329,6 @@ function mapRowToPartRecord(row, category) {
     row.inStock ||
     'unknown';
 
-  // Always look at Apify PCPartPicker availability fields
   const apifyAvail = [
     row['prices/prices/0/availability'],
     row['prices/prices/1/availability'],
@@ -357,9 +337,7 @@ function mapRowToPartRecord(row, category) {
     .map((v) => (v ? String(v).trim() : ''))
     .filter((v) => v.length > 0);
 
-  // If we didn't get a direct availability string, derive it from Apify vendors
   if ((!availability || availability === 'unknown') && apifyAvail.length > 0) {
-    // Prefer any value containing "in stock" (case-insensitive), otherwise take the first non-empty value
     const inStockCandidate = apifyAvail.find((v) =>
       v.toLowerCase().includes('in stock'),
     );
@@ -368,7 +346,6 @@ function mapRowToPartRecord(row, category) {
 
   let inStock = isInStock(availability);
 
-  // If still not in stock, but any Apify vendor says "In stock", treat as in stock
   if (!inStock && apifyAvail.some((v) => v.toLowerCase().includes('in stock'))) {
     inStock = true;
   }
@@ -384,7 +361,7 @@ function mapRowToPartRecord(row, category) {
       v === 'yes' ||
       v === '1';
   } else {
-    approved = undefined; // do not override existing DynamoDB value
+    approved = undefined;
   }
 
   const useInBuildsRaw =
@@ -443,7 +420,6 @@ function mapRowToPartRecord(row, category) {
     row.Slug ||
     (buyLink ? slugify(buyLink) : slugify(name));
 
-  // Basic specs, especially useful for CPUs (and harmless for other categories)
   const cores =
     row.cores ||
     row.Cores ||
@@ -512,7 +488,6 @@ function mapRowToPartRecord(row, category) {
 function addStorageSpecsFromRow(row, specs) {
   if (!row || !specs) return;
 
-  // Capacity (e.g., "2 TB", "500 GB", "1.024 TB")
   const capacityRaw =
     row.capacity ||
     row.Capacity ||
@@ -535,7 +510,6 @@ function addStorageSpecsFromRow(row, specs) {
     }
   }
 
-  // Type vs RPM (SSD / HDD / Hybrid, and rpm if present)
   const typeOrRpm =
     row.type_or_rpm ||
     row.Type ||
@@ -566,7 +540,6 @@ function addStorageSpecsFromRow(row, specs) {
     }
   }
 
-  // Cache (e.g., "256 MB")
   const cacheRaw = row.cache || row.Cache || null;
   if (cacheRaw) {
     const cacheStr = String(cacheRaw).trim();
@@ -579,7 +552,6 @@ function addStorageSpecsFromRow(row, specs) {
     }
   }
 
-  // Form factor (e.g., "M.2-2280", "2.5\"", "3.5\"")
   const formFactor =
     row.form_factor ||
     row['form factor'] ||
@@ -590,7 +562,6 @@ function addStorageSpecsFromRow(row, specs) {
     specs.formFactor = String(formFactor).trim();
   }
 
-  // Interface + NVMe flag (e.g., "M.2 PCIe 4.0 X4", "SATA 6.0 Gb/s")
   const iface =
     row.interface ||
     row.Interface ||
@@ -603,7 +574,6 @@ function addStorageSpecsFromRow(row, specs) {
     specs.isNvme = /pcie/i.test(ifaceStr);
   }
 
-  // Price per GB (strip currency symbols)
   const pricePerGbRaw =
     row.price_per_gb ||
     row.pricePerGb ||
@@ -616,7 +586,6 @@ function addStorageSpecsFromRow(row, specs) {
     }
   }
 
-  // Rating count
   const ratingRaw =
     row.rating_count ||
     row.RatingCount ||
