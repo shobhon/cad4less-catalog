@@ -1126,7 +1126,7 @@ function CatalogDashboard() {
       {/* 1. CPU Catalog */}
       <section className="panel panel--catalog">
         <header className="panel-header">
-          <h2>1. CPU Catalog (Live Data)</h2>
+          <h2>1. CPU Catalog</h2>
           <p className="panel-subtitle">
             Review every CPU currently in the catalog. Turn on{" "}
             <strong>&quot;Use in builds&quot;</strong> for processors you are
@@ -1386,7 +1386,7 @@ function CatalogDashboard() {
       {/* 2. Motherboard Catalog */}
       <section className="panel panel--catalog">
         <header className="panel-header">
-          <h2>2. Motherboard Catalog (Live Data)</h2>
+          <h2>2. Motherboard Catalog</h2>
           <p className="panel-subtitle">
             Review all motherboards currently available in your catalog. Turn on{" "}
             <strong>&quot;Use in builds&quot;</strong> for boards you want to allow in
@@ -1680,7 +1680,7 @@ function CatalogDashboard() {
       {/* 3. CPU Coolers Catalog */}
       <section className="panel panel--catalog">
         <header className="panel-header">
-          <h2>3. CPU Coolers Catalog (Live Data)</h2>
+          <h2>3. CPU Coolers Catalog</h2>
           <p className="panel-subtitle">
             Review all CPU coolers currently available in your catalog. Turn on{" "}
             <strong>&quot;Use in builds&quot;</strong> for coolers you want to include
@@ -1945,7 +1945,7 @@ function CatalogDashboard() {
       {/* 4. Memory / RAM Catalog */}
       <section className="panel panel--catalog">
         <header className="panel-header">
-          <h2>4. Memory / RAM Catalog (Live Data)</h2>
+          <h2>4. Memory / RAM Catalog</h2>
           <p className="panel-subtitle">
             Review all memory modules currently available in your catalog. Turn on{" "}
             <strong>&quot;Use in builds&quot;</strong> for RAM kits you want to include
@@ -2234,7 +2234,7 @@ function CatalogDashboard() {
       {/* 5. Video Card Catalog */}
       <section className="panel panel--catalog">
         <header className="panel-header">
-          <h2>5. Video Card Catalog (Live Data)</h2>
+          <h2>5. Video Card Catalog</h2>
           <p className="panel-subtitle">
             Review all video cards currently available in your catalog. Turn on{" "}
             <strong>&quot;Use in builds&quot;</strong> for GPUs you want to include in
