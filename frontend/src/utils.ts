@@ -11,6 +11,41 @@ export function formatMoney(value: number): string {
   });
 }
 
+export type CategoryId =
+  | "cpu"
+  | "cpu-cooler"
+  | "motherboard"
+  | "memory"
+  | "video-card"
+  | "power-supply"
+  | "case"
+  | "other";
+
+export function normalizeCategory(raw: string | undefined | null): CategoryId {
+  if (!raw) return "other";
+
+  const v = raw.trim().toLowerCase();
+
+  switch (v) {
+    case "cpu":
+      return "cpu";
+    case "motherboard":
+      return "motherboard";
+    case "cpu-cooler":
+      return "cpu-cooler";
+    case "memory":
+      return "memory";
+    case "video card":
+      return "video-card";
+    case "power supply":
+      return "power-supply";
+    case "case":
+      return "case";
+    default:
+      return "other";
+  }
+}
+
 /**
  * Get the best (lowest) numeric price from either the top-level price
  * or any vendorList entries.

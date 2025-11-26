@@ -661,6 +661,15 @@ function CatalogDashboard() {
   const [memorySortKey, setMemorySortKey] = useState<SortKey>("name-asc");
   const [memoryPage, setMemoryPage] = useState(1);
 
+  // ---- Video Card catalog state ----
+  const [videoCards, setVideoCards] = useState<Part[]>([]);
+  const [loadingVideoCards, setLoadingVideoCards] = useState(false);
+  const [videoCardError, setVideoCardError] = useState<string | null>(null);
+  const [videoCardSearch, setVideoCardSearch] = useState("");
+  const [videoCardStoreFilter, setVideoCardStoreFilter] = useState<string>("all");
+  const [videoCardSortKey, setVideoCardSortKey] = useState<SortKey>("name-asc");
+  const [videoCardPage, setVideoCardPage] = useState(1);
+
   // ---- Compatibility filter state ----
   const loadMemory = React.useCallback(async () => {
     setLoadingMemory(true);
@@ -700,6 +709,66 @@ function CatalogDashboard() {
   useEffect(() => {
     void loadMemory();
   }, [loadMemory]);
+
+  // ---- Video Card loader (effect) ----
+  const loadVideoCards = React.useCallback(async () => {
+    setLoadingVideoCards(true);
+    setVideoCardError(null);
+
+    try {
+      let data: any | null = null;
+
+      try {
+        // First, try the slug-style category string: "video-card".
+        data = await fetchParts("video-card" as any, "all");
+      } catch (err1: any) {
+        const msg1 = String(err1?.message ?? "");
+        console.warn(
+          "video-card category fetch failed, trying 'Video Card' next",
+          msg1
+        );
+
+        try {
+          // Second attempt: use the spaced category name we see in DynamoDB.
+          data = await fetchParts("Video Card" as any, "all");
+        } catch (err2: any) {
+          const msg2 = String(err2?.message ?? "");
+          console.warn(
+            "'Video Card' category fetch failed; falling back to full catalog and client-side filter",
+            msg2
+          );
+
+          // Final fallback: load all parts (no category filter) and filter
+          // for video cards on the frontend.
+          const all = await fetchParts(undefined as any, "all");
+          const allParts: Part[] = all.parts ?? [];
+
+          const filtered = allParts.filter((p: any) => {
+            const raw =
+              (p.category as string | undefined) ||
+              (p.Category as string | undefined) ||
+              "";
+            const v = raw.toString().trim().toLowerCase();
+            return v === "video card" || v === "video-card";
+          });
+
+          data = { parts: filtered };
+        }
+      }
+
+      setVideoCards((data?.parts ?? []) as Part[]);
+      setVideoCardPage(1);
+    } catch (err: any) {
+      console.error("Failed to fetch video cards", err);
+      setVideoCardError(err?.message ?? "Failed to fetch video cards");
+    } finally {
+      setLoadingVideoCards(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadVideoCards();
+  }, [loadVideoCards]);
   const [activeSocket, setActiveSocket] = useState<string | null>(null);
   const [activeSocketLabel, setActiveSocketLabel] = useState<string | null>(null);
   const [activeSocketKeys, setActiveSocketKeys] = useState<string[]>([]);
@@ -891,7 +960,27 @@ function CatalogDashboard() {
     memoryStart + PAGE_SIZE
   );
 
-  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal;
+  // ---- Video Card derived lists ----
+  const videoCardsLive = React.useMemo(() => videoCards, [videoCards]);
+  const videoCardStores = ["all", ...getStoreOptions(videoCardsLive)];
+  const videoCardProcessed = applyFiltersAndSorting(
+    videoCardsLive,
+    videoCardSearch,
+    videoCardStoreFilter,
+    videoCardSortKey,
+    { requirePrice: true, socketFilterKeys: [] }
+  );
+  const videoCardTotal = videoCardsLive.length;
+  const videoCardMatching = videoCardProcessed.sorted.length;
+  const videoCardPageCount = Math.max(1, Math.ceil(videoCardMatching / PAGE_SIZE));
+  const videoCardPageClamped = Math.min(videoCardPage, videoCardPageCount);
+  const videoCardStart = (videoCardPageClamped - 1) * PAGE_SIZE;
+  const videoCardPageItems = videoCardProcessed.sorted.slice(
+    videoCardStart,
+    videoCardStart + PAGE_SIZE
+  );
+
+  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal + videoCardTotal;
 
   return (
     <>
@@ -911,6 +1000,7 @@ function CatalogDashboard() {
           <span>Motherboards: {mbTotal}</span>
           <span>CPU coolers: {coolerTotal}</span>
           <span>Memory / RAM: {memoryTotal}</span>
+          <span>Video cards: {videoCardTotal}</span>
         </div>
         {activeSocket && (
           <div className="compat-banner">
@@ -1995,6 +2085,261 @@ function CatalogDashboard() {
                   setMemoryPage((prev) => Math.min(prev + 1, memoryPageCount))
                 }
                 disabled={memoryPageClamped >= memoryPageCount}
+              >
+                Next page
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* 5. Video Card Catalog */}
+      <section className="panel panel--catalog">
+        <header className="panel-header">
+          <h2>5. Video Card Catalog (Live Data)</h2>
+          <p className="panel-subtitle">
+            Review all video cards currently available in your catalog. Turn on{" "}
+            <strong>&quot;Use in builds&quot;</strong> for GPUs you want to include in
+            CAD4Less PC builds.
+          </p>
+        </header>
+
+        <div className="toolbar">
+          <div className="toolbar-group">
+            <label className="toolbar-label">Store filter</label>
+            <select
+              className="toolbar-select"
+              value={videoCardStoreFilter}
+              onChange={(e) => {
+                setVideoCardStoreFilter(e.target.value);
+                setVideoCardPage(1);
+              }}
+            >
+              {videoCardStores.map((s) => (
+                <option key={s} value={s}>
+                  {s === "all" ? "All stores" : s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label">Search by name / ID</label>
+            <input
+              className="toolbar-input"
+              type="text"
+              placeholder="e.g. RTX 4070, RX 7800 XT"
+              value={videoCardSearch}
+              onChange={(e) => {
+                setVideoCardSearch(e.target.value);
+                setVideoCardPage(1);
+              }}
+            />
+          </div>
+
+          <div className="toolbar-group">
+            <label className="toolbar-label">Sort by</label>
+            <select
+              className="toolbar-select"
+              value={videoCardSortKey}
+              onChange={(e) => {
+                setVideoCardSortKey(e.target.value as SortKey);
+                setVideoCardPage(1);
+              }}
+            >
+              <option value="name-asc">Name (A → Z)</option>
+              <option value="price-asc">Price (low → high)</option>
+              <option value="price-desc">Price (high → low)</option>
+            </select>
+          </div>
+
+          <div className="toolbar-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void loadVideoCards()}
+              disabled={loadingVideoCards}
+            >
+              {loadingVideoCards ? "Refreshing…" : "Reload list"}
+            </button>
+          </div>
+        </div>
+
+        <div className="table-meta">
+          <span>Video cards in catalog: {videoCardTotal}</span>
+          <span>Matching filters: {videoCardMatching}</span>
+          <span>
+            Showing: {videoCardPageItems.length} of {videoCardMatching} (page{" "}
+            {videoCardPageClamped} / {videoCardPageCount})
+          </span>
+        </div>
+
+        {videoCardError && <div className="alert alert-error">{videoCardError}</div>}
+
+        {loadingVideoCards ? (
+          <div className="table-loading">Loading video cards…</div>
+        ) : videoCardMatching === 0 ? (
+          <div className="table-empty">
+            No video cards match the current filters. Adjust the filters above or run
+            the video card import job in the backend to refresh the list.
+          </div>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th className="use-in-builds-col">Use in builds</th>
+                    <th>Video card</th>
+                    <th>Store</th>
+                    <th>Price</th>
+                    <th>Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {videoCardPageItems.map((p) => {
+                    const bestPrice = getBestPrice(p);
+                    const { label: storeLabel, url: storeUrl } = getPrimaryOffer(p);
+
+                    return (
+                      <tr key={p.id ?? p.name} className="clickable-row">
+                        <td
+                          className="use-in-builds-cell"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!p.approved}
+                            onChange={async (e) => {
+                              const next = e.target.checked;
+
+                              setVideoCards((prev) =>
+                                prev.map((item) =>
+                                  item.id === p.id ? { ...item, approved: next } : item
+                                )
+                              );
+
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn(
+                                  "Skipping updatePartApproved for video card with no id",
+                                  p
+                                );
+                                return;
+                              }
+
+                              console.log("Updating Video Card approval", {
+                                id: partId,
+                                category: "video-card",
+                                approved: next,
+                              });
+
+                              try {
+                                await updatePartApproved(partId, "video-card", next);
+                              } catch (err) {
+                                console.error("Failed to update video card approval", err);
+                                setVideoCards((prev) =>
+                                  prev.map((item) =>
+                                    item.id === p.id ? { ...item, approved: !next } : item
+                                  )
+                                );
+                                alert("Failed to save selection for this video card.");
+                              }
+                            }}
+                          />
+                        </td>
+                        <td className="cell-main">
+                          <div className="cell-title">{p.name}</div>
+                          {p.productLink && (
+                            <a
+                              href={p.productLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {p.productLink}
+                            </a>
+                          )}
+                        </td>
+                        <td>
+                          {storeUrl ? (
+                            <a
+                              href={storeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {storeLabel}
+                            </a>
+                          ) : (
+                            storeLabel || "—"
+                          )}
+                        </td>
+                        <td>{bestPrice != null ? formatMoney(bestPrice) : "—"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert("Cannot delete this video card because it has no ID.");
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this video card from the catalog?\n\n${p.name ?? p.id}`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setVideoCards((prev) =>
+                                  prev.filter((item) => item.id !== p.id)
+                                );
+                              } catch (err) {
+                                console.error("Failed to delete video card", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this video card. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pagination">
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  setVideoCardPage((prev) => Math.max(1, prev - 1))
+                }
+                disabled={videoCardPageClamped <= 1}
+              >
+                Previous page
+              </button>
+              <span className="pagination-info">
+                Page {videoCardPageClamped} of {videoCardPageCount}
+              </span>
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  setVideoCardPage((prev) =>
+                    Math.min(prev + 1, videoCardPageCount)
+                  )
+                }
+                disabled={videoCardPageClamped >= videoCardPageCount}
               >
                 Next page
               </button>

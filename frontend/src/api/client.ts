@@ -1,5 +1,7 @@
-// frontend/src/api/client.ts
-// Typed wrapper around the CAD4Less backend HTTP API.
+/**
+ * frontend/src/api/client.ts
+ * Typed wrapper around the CAD4Less backend HTTP API.
+ */
 
 export interface Part {
   id?: string;
@@ -18,6 +20,11 @@ export type PartCategory =
   | "cpu"
   | "cpu-cooler"
   | "motherboard"
+  | "memory"
+  | "Video Card"
+  | "video-card"
+  | "Power Supply"
+  | "Case"
   | string;
 
 // Base URL for the backend API. Prefer VITE_API_BASE if provided.
@@ -75,19 +82,32 @@ export interface FetchPartsResponse {
 /**
  * Fetches parts for a given category from the backend.
  *
+ * If category is undefined or an empty string, the category filter is omitted
+ * and the backend is expected to return all parts (optionally filtered by store).
+ *
  * `store` can be "all" or a specific store label.
  */
 export async function fetchParts(
-  category: PartCategory,
+  category: PartCategory | undefined,
   store: string = "all"
 ): Promise<FetchPartsResponse> {
   const params = new URLSearchParams();
-  params.set("category", String(category));
+
+  // Only include category if it is a meaningful string. This prevents
+  // accidental ?category=undefined when the caller wants all parts.
+  if (typeof category === "string" && category.trim().length > 0) {
+    params.set("category", category.trim());
+  }
+
+  // Preserve existing behavior for store: only include when not "all".
   if (store && store !== "all") {
     params.set("store", store);
   }
 
-  const url = `${API_BASE}/parts?${params.toString()}`;
+  const query = params.toString();
+  const url =
+    query.length > 0 ? `${API_BASE}/parts?${query}` : `${API_BASE}/parts`;
+
   return fetchJson<FetchPartsResponse>(url);
 }
 
@@ -115,7 +135,6 @@ export async function updatePartApproved(
 
 /**
  * Triggers an Apify-powered import for the given category.
- * (Currently not heavily used by the UI but kept for future actions.)
  */
 export async function runApifyImport(
   category: PartCategory
@@ -148,8 +167,7 @@ export async function importPartsFromCsv(
   });
 }
 
-// Re-exporting key helpers as a single object can sometimes help with tooling,
-// but the app primarily uses the named exports above.
+// Convenience object if you ever want to import a single ApiClient namespace.
 export const ApiClient = {
   fetchParts,
   updatePartApproved,

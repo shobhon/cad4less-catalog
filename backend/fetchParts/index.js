@@ -27,7 +27,10 @@ async function getLivePartsFromDynamo(category) {
     throw new Error("TABLE_NAME is not set");
   }
 
-  const normalized = String(category || "").toLowerCase();
+  const normalized = String(category || "")
+    .toLowerCase()
+    .replace(/[-_]+/g, " ")
+    .trim();
 
   console.log("DDB debug", {
     lambdaRegion: process.env.AWS_REGION,
@@ -41,15 +44,22 @@ async function getLivePartsFromDynamo(category) {
     ? category.charAt(0).toUpperCase() + category.slice(1)
     : "";
 
+  const titleCasedNormalized = normalized
+    ? normalized.replace(/\b\w/g, (c) => c.toUpperCase())
+    : "";
+
   const candidateCategories = Array.from(
-    new Set([
-      category,
-      normalized,
-      ucFirst,
-      // Explicitly include both memory/Memory to cover existing data
-      "memory",
-      "Memory",
-    ].filter(Boolean))
+    new Set(
+      [
+        category,
+        normalized,
+        ucFirst,
+        titleCasedNormalized,
+        // Explicitly include both memory/Memory to cover existing data
+        "memory",
+        "Memory",
+      ].filter(Boolean)
+    )
   );
 
   let allItems = [];
@@ -73,13 +83,16 @@ async function getLivePartsFromDynamo(category) {
   }
 
   // Final in-memory filter to ensure we only return items that logically
-  // belong to the requested category (case-insensitive match).
-  return allItems.filter(
-    (item) =>
-      item &&
-      typeof item.category === "string" &&
-      item.category.toLowerCase() === normalized
-  );
+  // belong to the requested category (case-insensitive match, treating
+  // dashes/underscores and spaces equivalently).
+  return allItems.filter((item) => {
+    if (!item || typeof item.category !== "string") return false;
+    const itemCat = item.category
+      .toLowerCase()
+      .replace(/[-_]+/g, " ")
+      .trim();
+    return itemCat === normalized;
+  });
 }
 
 exports.handler = async (event) => {
@@ -180,10 +193,13 @@ exports.handler = async (event) => {
       }
 
       // Default GET logic for listing parts
-      const category = (qs.category || "cpu").toLowerCase();
+      const categoryParam = qs.category || "cpu";
+      const category = String(categoryParam).toLowerCase();
       const vendorFilter = (qs.vendor || "all").toLowerCase();
 
-      const parts = await getLivePartsFromDynamo(category);
+      // Pass the original (non-lowercased) category into the Dynamo helper so
+      // it can match stored values like "Video Card" correctly.
+      const parts = await getLivePartsFromDynamo(categoryParam);
 
       if (!parts || parts.length === 0) {
         return {
