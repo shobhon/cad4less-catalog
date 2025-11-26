@@ -481,6 +481,16 @@ function getStoreLabel(p: Part): string {
   return "unknown";
 }
 
+function normalizeStoreLabel(label: string | null | undefined): string {
+  if (!label) return "unknown";
+  const s = label.trim();
+  const lower = s.toLowerCase();
+  if (lower.replace(/\s+/g, "").includes("pcpartpicker")) {
+    return "PCPartPicker";
+  }
+  return s;
+}
+
 function getPrimaryOffer(p: Part): { label: string; url: string | null } {
   const anyPart = p as any;
 
@@ -596,7 +606,7 @@ function getPrimaryOffer(p: Part): { label: string; url: string | null } {
     label = "unknown";
   }
 
-  return { label, url };
+  return { label: normalizeStoreLabel(label), url };
 }
 
 type BestOffer = {
@@ -632,14 +642,15 @@ function applyFiltersAndSorting(
   searchText: string,
   storeFilter: string,
   sortKey: SortKey,
-  options?: { requirePrice?: boolean; socketFilterKeys?: string[] }
+  options?: { requirePrice?: boolean; socketFilterKeys?: string[]; skipInStockCheck?: boolean }
 ) {
   const requirePrice = options?.requirePrice ?? false;
   const socketFilterKeys = options?.socketFilterKeys ?? [];
+  const skipInStockCheck = options?.skipInStockCheck ?? false;
   const normalizedSearch = searchText.trim().toLowerCase();
 
   const filtered = items.filter((p) => {
-    if (!isInStock(p)) return false;
+    if (!skipInStockCheck && !isInStock(p)) return false;
 
     if (requirePrice) {
       const price = getBestPrice(p);
@@ -659,7 +670,7 @@ function applyFiltersAndSorting(
     }
 
     if (storeFilter !== "all") {
-      if (!getStoreLabel(p) || getStoreLabel(p) !== storeFilter) {
+      if (!getStoreLabel(p) || normalizeStoreLabel(getStoreLabel(p)) !== storeFilter) {
         return false;
       }
     }
@@ -708,7 +719,7 @@ function applyFiltersAndSorting(
 function getStoreOptions(items: Part[]): string[] {
   const set = new Set<string>();
   for (const p of items) {
-    const label = getStoreLabel(p);
+    const label = normalizeStoreLabel(getStoreLabel(p));
     if (label && label !== "unknown") {
       set.add(label);
     }
@@ -763,6 +774,15 @@ function CatalogDashboard() {
   const [videoCardSortKey, setVideoCardSortKey] = useState<SortKey>("name-asc");
   const [videoCardPage, setVideoCardPage] = useState(1);
 
+  // ---- Storage catalog state ----
+  const [storageParts, setStorageParts] = useState<Part[]>([]);
+  const [loadingStorage, setLoadingStorage] = useState(false);
+  const [storageError, setStorageError] = useState<string | null>(null);
+  const [storageSearch, setStorageSearch] = useState("");
+  const [storageStoreFilter, setStorageStoreFilter] = useState<string>("all");
+  const [storageSortKey, setStorageSortKey] = useState<SortKey>("name-asc");
+  const [storagePage, setStoragePage] = useState(1);
+
   // ---- Compatibility filter state ----
   const loadMemory = React.useCallback(async () => {
     setLoadingMemory(true);
@@ -802,6 +822,53 @@ function CatalogDashboard() {
   useEffect(() => {
     void loadMemory();
   }, [loadMemory]);
+
+  // ---- Storage loader (effect) ----
+  const loadStorage = React.useCallback(async () => {
+    setLoadingStorage(true);
+    setStorageError(null);
+
+    try {
+      let data: any;
+
+      try {
+        // First, try the lowercase category used by the rest of the app.
+        data = await fetchParts("storage" as any, "all");
+      } catch (err: any) {
+        const msg = String(err?.message ?? "");
+
+        // If the backend says there are no parts for "storage", fall back to
+        // the capitalized variant used by older imports ("Storage").
+        if (msg.includes("No parts found for category 'storage'")) {
+          console.warn(
+            "No parts found for category 'storage' – falling back to 'Storage'",
+            msg
+          );
+          data = await fetchParts("Storage" as any, "all");
+        } else {
+          throw err;
+        }
+      }
+
+      setStorageParts(data.parts ?? []);
+      setStoragePage(1);
+    } catch (err: any) {
+      const msg = String(err?.message ?? "");
+      if (msg.includes("No parts found for category")) {
+        console.warn("Storage: no parts found, leaving list empty", msg);
+        setStorageParts([]);
+        setStorageError(null);
+      } else {
+        console.error("Failed to fetch storage parts", err);
+        setStorageError(err?.message ?? "Failed to fetch storage parts");
+      }
+    } finally {
+      setLoadingStorage(false);
+    }
+  }, []);
+  useEffect(() => {
+    void loadStorage();
+  }, [loadStorage]);
 
   // ---- Video Card loader (effect) ----
   const loadVideoCards = React.useCallback(async () => {
@@ -1041,7 +1108,7 @@ function CatalogDashboard() {
     memorySearch,
     memoryStoreFilter,
     memorySortKey,
-    { requirePrice: true, socketFilterKeys: [] }
+    { requirePrice: false, socketFilterKeys: [], skipInStockCheck: true }
   );
   const memoryTotal = memoryLive.length;
   const memoryMatching = memoryProcessed.sorted.length;
@@ -1061,7 +1128,7 @@ function CatalogDashboard() {
     videoCardSearch,
     videoCardStoreFilter,
     videoCardSortKey,
-    { requirePrice: true, socketFilterKeys: [] }
+    { requirePrice: false, socketFilterKeys: [], skipInStockCheck: true }
   );
   const videoCardTotal = videoCardsLive.length;
   const videoCardMatching = videoCardProcessed.sorted.length;
@@ -1073,7 +1140,27 @@ function CatalogDashboard() {
     videoCardStart + PAGE_SIZE
   );
 
-  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal + videoCardTotal;
+  // ---- Storage derived lists ----
+  const storageLive = React.useMemo(() => storageParts, [storageParts]);
+  const storageStores = ["all", ...getStoreOptions(storageLive)];
+  const storageProcessed = applyFiltersAndSorting(
+    storageLive,
+    storageSearch,
+    storageStoreFilter,
+    storageSortKey,
+    { requirePrice: false, socketFilterKeys: [] }
+  );
+  const storageTotal = storageLive.length;
+  const storageMatching = storageProcessed.sorted.length;
+  const storagePageCount = Math.max(1, Math.ceil(storageMatching / PAGE_SIZE));
+  const storagePageClamped = Math.min(storagePage, storagePageCount);
+  const storageStart = (storagePageClamped - 1) * PAGE_SIZE;
+  const storagePageItems = storageProcessed.sorted.slice(
+    storageStart,
+    storageStart + PAGE_SIZE
+  );
+
+  const totalParts = cpuTotal + mbTotal + coolerTotal + memoryTotal + storageTotal + videoCardTotal;
 
   return (
     <>
@@ -1082,7 +1169,7 @@ function CatalogDashboard() {
         <header className="panel-header">
           <h2>Select Parts for PC Builds</h2>
           <p className="panel-subtitle">
-            Operations dashboard for CPUs, motherboards, CPU coolers, memory, and other
+            Operations dashboard for CPUs, motherboards, CPU coolers, memory, storage, video cards, and other
             PC components. Use the &quot;Use in builds&quot; column to choose which
             parts are eligible for CAD4Less custom PC builds.
           </p>
@@ -1093,6 +1180,7 @@ function CatalogDashboard() {
           <span>Motherboards: {mbTotal}</span>
           <span>CPU coolers: {coolerTotal}</span>
           <span>Memory / RAM: {memoryTotal}</span>
+          <span>Storage (HDD / SSD): {storageTotal}</span>
           <span>Video cards: {videoCardTotal}</span>
         </div>
         {activeSocket && (
@@ -2231,10 +2319,260 @@ function CatalogDashboard() {
         )}
       </section>
 
-      {/* 5. Video Card Catalog */}
+      {/* 5. Storage Catalog */}
       <section className="panel panel--catalog">
         <header className="panel-header">
-          <h2>5. Video Card Catalog</h2>
+          <h2>5. Storage Catalog</h2>
+          <p className="panel-subtitle">
+            Review all storage drives currently available in your catalog. This section
+            will soon show a full table for HDDs and SSDs, similar to the other catalogs.
+          </p>
+        </header>
+
+        <div className="toolbar">
+          <div className="toolbar-group">
+            <label className="toolbar-label">Store filter</label>
+            <select
+              className="toolbar-select"
+              value={storageStoreFilter}
+              onChange={(e) => {
+                setStorageStoreFilter(e.target.value);
+                setStoragePage(1);
+              }}
+            >
+              {storageStores.map((s) => (
+                <option key={s} value={s}>
+                  {s === "all" ? "All stores" : s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="toolbar-group toolbar-group--grow">
+            <label className="toolbar-label">Search by name / ID</label>
+            <input
+              className="toolbar-input"
+              type="text"
+              placeholder="e.g. 2TB, 990 PRO, SN850X"
+              value={storageSearch}
+              onChange={(e) => {
+                setStorageSearch(e.target.value);
+                setStoragePage(1);
+              }}
+            />
+          </div>
+
+          <div className="toolbar-group">
+            <label className="toolbar-label">Sort by</label>
+            <select
+              className="toolbar-select"
+              value={storageSortKey}
+              onChange={(e) => {
+                setStorageSortKey(e.target.value as SortKey);
+                setStoragePage(1);
+              }}
+            >
+              <option value="name-asc">Name (A → Z)</option>
+              <option value="price-asc">Price (low → high)</option>
+              <option value="price-desc">Price (high → low)</option>
+            </select>
+          </div>
+
+          <div className="toolbar-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void loadStorage()}
+              disabled={loadingStorage}
+            >
+              {loadingStorage ? "Refreshing…" : "Reload list"}
+            </button>
+          </div>
+        </div>
+
+        <div className="table-meta">
+          <span>Drives in catalog: {storageTotal}</span>
+          <span>Matching filters: {storageMatching}</span>
+          <span>
+            Showing: {storagePageItems.length} of {storageMatching} (page {storagePageClamped} / {storagePageCount})
+          </span>
+        </div>
+
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th className="use-in-builds-col">Use in builds</th>
+                <th>Storage drive</th>
+                <th>Store</th>
+                <th>Price</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+                            <tbody>
+                  {storagePageItems.map((p) => {
+                    const { storeLabel, storeUrl, price } = getBestOfferForPart(p);
+
+                    const normalizedStore = (storeLabel || "")
+                      .toString()
+                      .toLowerCase()
+                      .trim();
+                    const isPcPartPickerStore =
+                      normalizedStore === "pcpartpicker" ||
+                      normalizedStore === "pc part picker";
+
+                    const storeCell = storeUrl ? (
+                      <a
+                        href={storeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="cell-link"
+                      >
+                        {isPcPartPickerStore ? "PCPartPicker" : storeLabel}
+                      </a>
+                    ) : (
+                      storeLabel || "—"
+                    );
+
+                    const priceCell: React.ReactNode =
+                      price != null && Number.isFinite(price) && price > 0
+                        ? formatMoney(price)
+                        : isPcPartPickerStore && storeUrl
+                        ? (
+                            <a
+                              href={storeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {"View price on PCPartPicker"}
+                            </a>
+                          )
+                        : "—";
+
+                    return (
+                      <tr key={p.id ?? p.name} className="clickable-row">
+                        {/* 1. Use in builds */}
+                        <td
+                          className="use-in-builds-cell"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!p.approved}
+                            onChange={async (e) => {
+                              const next = e.target.checked;
+                              setStorageParts((prev) =>
+                                prev.map((item) =>
+                                  item.id === p.id ? { ...item, approved: next } : item
+                                )
+                              );
+                              const partId = p.id ? String(p.id) : null;
+                              if (!partId) {
+                                console.warn(
+                                  "Skipping updatePartApproved for storage with no id",
+                                  p
+                                );
+                                return;
+                              }
+                              console.log("Updating Storage approval", {
+                                id: partId,
+                                category: "storage",
+                                approved: next,
+                              });
+                              try {
+                                await updatePartApproved(partId, "storage", next);
+                              } catch (err) {
+                                console.error("Failed to update storage approval", err);
+                                setStorageParts((prev) =>
+                                  prev.map((item) =>
+                                    item.id === p.id
+                                      ? { ...item, approved: !next }
+                                      : item
+                                  )
+                                );
+                                alert(
+                                  "Failed to save selection for this storage drive."
+                                );
+                              }
+                            }}
+                          />
+                        </td>
+
+                        {/* 2. Storage drive (name + link) */}
+                        <td className="cell-main">
+                          <div className="cell-title">{p.name}</div>
+                          {p.productLink && (
+                            <a
+                              href={p.productLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {p.productLink}
+                            </a>
+                          )}
+                        </td>
+
+                        {/* 3. Store */}
+                        <td>{storeCell}</td>
+
+                        {/* 4. Price */}
+                        <td>{priceCell}</td>
+
+                        {/* 5. Delete */}
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!p.id) {
+                                alert(
+                                  "Cannot delete this storage drive because it has no ID."
+                                );
+                                return;
+                              }
+                              const ok = window.confirm(
+                                `Delete this storage drive from the catalog?
+
+${
+                                  p.name ?? p.id
+                                }`
+                              );
+                              if (!ok) return;
+                              try {
+                                await deletePart(p.id as string);
+                                setStorageParts((prev) =>
+                                  prev.filter((item) => item.id !== p.id)
+                                );
+                              } catch (err) {
+                                console.error("Failed to delete storage drive", err);
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Failed to delete this storage drive. Please try again.";
+                                alert(message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* 6. Video Card Catalog */}
+      <section className="panel panel--catalog">
+        <header className="panel-header">
+          <h2>6. Video Card Catalog</h2>
           <p className="panel-subtitle">
             Review all video cards currently available in your catalog. Turn on{" "}
             <strong>&quot;Use in builds&quot;</strong> for GPUs you want to include in
@@ -2338,8 +2676,13 @@ function CatalogDashboard() {
                   {videoCardPageItems.map((p) => {
                     const { storeLabel, storeUrl, price } = getBestOfferForPart(p);
 
-                    const normalizedStore = (storeLabel || "").toString().toLowerCase().trim();
-                    const isPcPartPickerStore = normalizedStore === "pcpartpicker" || normalizedStore === "pc part picker";
+                    const normalizedStore = (storeLabel || "")
+                      .toString()
+                      .toLowerCase()
+                      .trim();
+                    const isPcPartPickerStore =
+                      normalizedStore === "pcpartpicker" ||
+                      normalizedStore === "pc part picker";
 
                     const storeCell = storeUrl ? (
                       <a
@@ -2348,7 +2691,7 @@ function CatalogDashboard() {
                         rel="noreferrer"
                         className="cell-link"
                       >
-                        {storeLabel}
+                        {isPcPartPickerStore ? "PCPartPicker" : storeLabel}
                       </a>
                     ) : (
                       storeLabel || "—"
@@ -2357,10 +2700,22 @@ function CatalogDashboard() {
                     const priceCell: React.ReactNode =
                       price != null && Number.isFinite(price) && price > 0
                         ? formatMoney(price)
+                        : isPcPartPickerStore && storeUrl
+                        ? (
+                            <a
+                              href={storeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="cell-link"
+                            >
+                              {"View price on PCPartPicker"}
+                            </a>
+                          )
                         : "—";
 
                     return (
                       <tr key={p.id ?? p.name} className="clickable-row">
+                        {/* 1. Use in builds */}
                         <td
                           className="use-in-builds-cell"
                           onClick={(e) => {
@@ -2408,6 +2763,8 @@ function CatalogDashboard() {
                             }}
                           />
                         </td>
+
+                        {/* 2. Video card (name + link) */}
                         <td className="cell-main">
                           <div className="cell-title">{p.name}</div>
                           {p.productLink && (
@@ -2421,10 +2778,14 @@ function CatalogDashboard() {
                             </a>
                           )}
                         </td>
-                        
+
+                        {/* 3. Store */}
                         <td>{storeCell}</td>
+
+                        {/* 4. Price */}
                         <td>{priceCell}</td>
-                        
+
+                        {/* 5. Delete */}
                         <td>
                           <button
                             type="button"
@@ -2432,11 +2793,15 @@ function CatalogDashboard() {
                             onClick={async (e) => {
                               e.stopPropagation();
                               if (!p.id) {
-                                alert("Cannot delete this video card because it has no ID.");
+                                alert(
+                                  "Cannot delete this video card because it has no ID."
+                                );
                                 return;
                               }
                               const ok = window.confirm(
-                                `Delete this video card from the catalog?\n\n${p.name ?? p.id}`
+                                `Delete this video card from the catalog?\n\n${
+                                  p.name ?? p.id
+                                }`
                               );
                               if (!ok) return;
                               try {
@@ -2539,6 +2904,8 @@ const AddPartsTab: React.FC = () => {
     setStatus(null);
 
     try {
+      console.log("DEBUG importPartsFromCsv category", importCategory);
+
       const result = await importPartsFromCsv(category as any, trimmed);
       console.log("CSV import result", result);
 
@@ -3226,3 +3593,19 @@ const App: React.FC = () => {
 };
 
 export default App;
+function getStorageSummary(p: Part): string {
+  const anyPart: any = p;
+  const specs: any = anyPart.specs ?? {};
+  const capacity = specs.capacityRaw ?? "";
+  const type = specs.storageType ?? "";
+  const formFactor = specs.formFactor ?? "";
+  const iface = specs.interface ?? "";
+
+  const bits = [capacity, type, formFactor, iface]
+    .map((x) => String(x || "").trim())
+    .filter(Boolean);
+
+  if (!bits.length) return "";
+  return bits.join(" · ");
+}
+

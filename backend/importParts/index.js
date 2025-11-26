@@ -179,11 +179,25 @@ function splitCsvLine(line) {
     const ch = line[i];
 
     if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
-        i++;
+      if (inQuotes) {
+        // Inside a quoted field
+        if (line[i + 1] === '"') {
+          // Escaped quote ("")
+          current += '"';
+          i++;
+        } else {
+          // Closing quote
+          inQuotes = false;
+        }
       } else {
-        inQuotes = !inQuotes;
+        // Not currently in quotes
+        if (current === '') {
+          // Quote at the start of the field starts a quoted section
+          inQuotes = true;
+        } else {
+          // Quote in the middle of a field is treated as a literal character
+          current += '"';
+        }
       }
     } else if (ch === ',' && !inQuotes) {
       result.push(current);
@@ -211,6 +225,51 @@ function isInStock(availability) {
   return true;
 }
 
+function looksLikeStorageRow(row) {
+  if (!row) return false;
+
+  // 1) Exact "scrape-storage.csv" signature:
+  // name,capacity,price_per_gb,type_or_rpm,cache,form_factor,
+  // interface,rating_count,availability,price
+  const hasSignatureColumns =
+    Object.prototype.hasOwnProperty.call(row, 'capacity') &&
+    Object.prototype.hasOwnProperty.call(row, 'price_per_gb') &&
+    Object.prototype.hasOwnProperty.call(row, 'type_or_rpm') &&
+    Object.prototype.hasOwnProperty.call(row, 'cache') &&
+    Object.prototype.hasOwnProperty.call(row, 'form_factor') &&
+    Object.prototype.hasOwnProperty.call(row, 'interface') &&
+    Object.prototype.hasOwnProperty.call(row, 'rating_count') &&
+    Object.prototype.hasOwnProperty.call(row, 'availability') &&
+    Object.prototype.hasOwnProperty.call(row, 'price');
+
+  if (hasSignatureColumns) {
+    // This is our hard-coded storage CSV format
+    return true;
+  }
+
+  // 2) Fallback heuristic for other storage-looking CSVs
+  const hasCapacity = row.capacity || row.Capacity;
+  const hasTypeOrRpm =
+    row.type_or_rpm ||
+    row.Type ||
+    row.type ||
+    row.driveType ||
+    row.DriveType;
+  const hasFormFactor =
+    row.form_factor ||
+    row['form factor'] ||
+    row.FormFactor ||
+    row.formFactor;
+  const hasInterface =
+    row.interface ||
+    row.Interface ||
+    row.busInterface ||
+    row.BusInterface;
+
+  // Treat rows that look like Storage (HDD/SSD) as storage when no category is provided.
+  return !!(hasCapacity && (hasTypeOrRpm || hasFormFactor || hasInterface));
+}
+
 // ---------- Mapping + DynamoDB helpers ----------
 
 function mapRowToPartRecord(row, category) {
@@ -223,14 +282,24 @@ function mapRowToPartRecord(row, category) {
     row.PartCategory ||
     null;
 
-  const finalCategory =
-    (rowCategory && String(rowCategory).trim().length > 0
-      ? String(rowCategory).trim()
-      : null) ||
+  let finalCategory =
     (category && String(category).trim().length > 0
       ? String(category).trim()
       : null) ||
-    'unknown';
+    (rowCategory && String(rowCategory).trim().length > 0
+      ? String(rowCategory).trim()
+      : null) ||
+    null;
+
+  // If neither the request nor the row provided a category, but the row clearly
+  // looks like a Storage (HDD/SSD) part, infer "storage" as the category.
+  if (!finalCategory && looksLikeStorageRow(row)) {
+    finalCategory = 'storage';
+  }
+
+  if (!finalCategory) {
+    finalCategory = 'unknown';
+  }
 
   const name =
     row.name ||
@@ -408,6 +477,10 @@ function mapRowToPartRecord(row, category) {
   if (socket) specs.socket = String(socket);
   if (tdp) specs.tdp = String(tdp);
 
+  if (String(finalCategory).toLowerCase() === 'storage') {
+    addStorageSpecsFromRow(row, specs);
+  }
+
   const vendorEntry = {
     vendor,
     price:
@@ -436,6 +509,132 @@ function mapRowToPartRecord(row, category) {
   };
 }
 
+function addStorageSpecsFromRow(row, specs) {
+  if (!row || !specs) return;
+
+  // Capacity (e.g., "2 TB", "500 GB", "1.024 TB")
+  const capacityRaw =
+    row.capacity ||
+    row.Capacity ||
+    row.capacityRaw ||
+    row.CapacityRaw ||
+    null;
+
+  if (capacityRaw) {
+    const capStr = String(capacityRaw).trim();
+    specs.capacityRaw = capStr;
+
+    const match = capStr.match(/^([\d.]+)\s*(tb|gb)/i);
+    if (match) {
+      const value = parseFloat(match[1]);
+      const unit = match[2].toLowerCase();
+      if (!Number.isNaN(value)) {
+        const gb = unit === 'tb' ? value * 1024 : value;
+        specs.capacityGb = gb;
+      }
+    }
+  }
+
+  // Type vs RPM (SSD / HDD / Hybrid, and rpm if present)
+  const typeOrRpm =
+    row.type_or_rpm ||
+    row.Type ||
+    row.type ||
+    row.driveType ||
+    row.DriveType ||
+    null;
+
+  if (typeOrRpm) {
+    const t = String(typeOrRpm).trim();
+
+    if (/ssd/i.test(t)) {
+      specs.storageType = 'ssd';
+    } else if (/hybrid/i.test(t)) {
+      specs.storageType = 'hybrid';
+    } else if (/rpm/i.test(t)) {
+      specs.storageType = 'hdd';
+    } else {
+      specs.storageType = t.toLowerCase();
+    }
+
+    const rpmMatch = t.match(/(\d+)\s*rpm/i);
+    if (rpmMatch) {
+      const rpmVal = parseInt(rpmMatch[1], 10);
+      if (!Number.isNaN(rpmVal)) {
+        specs.rpm = rpmVal;
+      }
+    }
+  }
+
+  // Cache (e.g., "256 MB")
+  const cacheRaw = row.cache || row.Cache || null;
+  if (cacheRaw) {
+    const cacheStr = String(cacheRaw).trim();
+    const cacheMatch = cacheStr.match(/([\d.]+)/);
+    if (cacheMatch) {
+      const cacheMb = parseFloat(cacheMatch[1]);
+      if (!Number.isNaN(cacheMb)) {
+        specs.cacheMb = cacheMb;
+      }
+    }
+  }
+
+  // Form factor (e.g., "M.2-2280", "2.5\"", "3.5\"")
+  const formFactor =
+    row.form_factor ||
+    row['form factor'] ||
+    row.FormFactor ||
+    row.formFactor ||
+    null;
+  if (formFactor) {
+    specs.formFactor = String(formFactor).trim();
+  }
+
+  // Interface + NVMe flag (e.g., "M.2 PCIe 4.0 X4", "SATA 6.0 Gb/s")
+  const iface =
+    row.interface ||
+    row.Interface ||
+    row.busInterface ||
+    row.BusInterface ||
+    null;
+  if (iface) {
+    const ifaceStr = String(iface).trim();
+    specs.interface = ifaceStr;
+    specs.isNvme = /pcie/i.test(ifaceStr);
+  }
+
+  // Price per GB (strip currency symbols)
+  const pricePerGbRaw =
+    row.price_per_gb ||
+    row.pricePerGb ||
+    row.PricePerGb ||
+    null;
+  if (pricePerGbRaw) {
+    const num = parseFloat(String(pricePerGbRaw).replace(/[^0-9.]/g, ''));
+    if (!Number.isNaN(num)) {
+      specs.pricePerGb = num;
+    }
+  }
+
+  // Rating count
+  const ratingRaw =
+    row.rating_count ||
+    row.RatingCount ||
+    row.ratings ||
+    row.Ratings ||
+    null;
+  if (
+    ratingRaw !== null &&
+    ratingRaw !== undefined &&
+    String(ratingRaw).trim() !== ''
+  ) {
+    const ratingNum = parseInt(String(ratingRaw).replace(/[^0-9]/g, ''), 10);
+    if (!Number.isNaN(ratingNum)) {
+      specs.ratingCount = ratingNum;
+    }
+  }
+}
+
 function slugify(value) {
   return String(value)
     .toLowerCase()
@@ -455,8 +654,13 @@ async function upsertPart(record) {
 
   const now = new Date().toISOString();
 
+  const categoryUpdate =
+    record.category === 'storage'
+      ? '#category = :category'
+      : '#category = if_not_exists(#category, :category)';
+
   const updateParts = [
-    '#category = if_not_exists(#category, :category)',
+    categoryUpdate,
     '#name = if_not_exists(#name, :name)',
     '#specs = if_not_exists(#specs, :specs)',
     '#price = :price',
