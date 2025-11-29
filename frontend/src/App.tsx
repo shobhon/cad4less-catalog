@@ -1240,7 +1240,14 @@ function CatalogDashboard() {
       {/* Overview tile */}
       <section className="panel">
         <header className="panel-header">
-          <h2>Select Parts for PC Builds</h2>
+          <div className="panel-title-with-logo">
+            <img
+              src="/logo.svg"
+              alt="CAD4Less logo"
+              className="site-logo"
+            />
+            <h2>Select Parts for PC Builds</h2>
+          </div>
           <p className="panel-subtitle">
             Operations dashboard for CPUs, motherboards, CPU coolers, memory, storage, video cards, and other
             PC components. Use the &quot;Use in builds&quot; column to choose which
